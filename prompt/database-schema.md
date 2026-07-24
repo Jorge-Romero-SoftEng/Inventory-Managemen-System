@@ -1,0 +1,114 @@
+# Database Schema
+
+```sql
+CREATE TABLE users (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(255) UNIQUE,
+  password_hash TEXT NOT NULL,
+  role VARCHAR(50) NOT NULL DEFAULT 'admin',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE categories (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE products (
+  id BIGSERIAL PRIMARY KEY,
+  barcode VARCHAR(100) UNIQUE,
+  sku VARCHAR(100) UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  category_id BIGINT REFERENCES categories(id),
+  unit VARCHAR(50) NOT NULL,
+  pack_size NUMERIC(12,3) DEFAULT 1,
+  cost NUMERIC(12,2) DEFAULT 0,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE customers (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  tax_id VARCHAR(50),
+  address TEXT,
+  phone VARCHAR(50),
+  credit_limit NUMERIC(12,2) DEFAULT 0,
+  balance NUMERIC(12,2) DEFAULT 0,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE price_lists (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE product_prices (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  price_list_id BIGINT NOT NULL REFERENCES price_lists(id) ON DELETE CASCADE,
+  price NUMERIC(12,2) NOT NULL,
+  UNIQUE(product_id, price_list_id)
+);
+
+CREATE TABLE stock (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  warehouse VARCHAR(100) NOT NULL DEFAULT 'main',
+  quantity NUMERIC(12,3) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(product_id, warehouse)
+);
+
+CREATE TABLE sales (
+  id BIGSERIAL PRIMARY KEY,
+  sale_number VARCHAR(50) UNIQUE NOT NULL,
+  customer_id BIGINT REFERENCES customers(id),
+  user_id BIGINT REFERENCES users(id),
+  subtotal NUMERIC(12,2) NOT NULL DEFAULT 0,
+  discount NUMERIC(12,2) NOT NULL DEFAULT 0,
+  tax NUMERIC(12,2) NOT NULL DEFAULT 0,
+  total NUMERIC(12,2) NOT NULL DEFAULT 0,
+  payment_method VARCHAR(50) NOT NULL,
+  status VARCHAR(50) NOT NULL DEFAULT 'completed',
+  delivery BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE sale_items (
+  id BIGSERIAL PRIMARY KEY,
+  sale_id BIGINT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  quantity NUMERIC(12,3) NOT NULL,
+  unit_price NUMERIC(12,2) NOT NULL,
+  discount NUMERIC(12,2) NOT NULL DEFAULT 0,
+  line_total NUMERIC(12,2) NOT NULL
+);
+
+CREATE TABLE payments (
+  id BIGSERIAL PRIMARY KEY,
+  sale_id BIGINT NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+  method VARCHAR(50) NOT NULL,
+  amount NUMERIC(12,2) NOT NULL,
+  reference VARCHAR(150),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE stock_movements (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id),
+  movement_type VARCHAR(50) NOT NULL,
+  quantity NUMERIC(12,3) NOT NULL,
+  reference_type VARCHAR(50),
+  reference_id BIGINT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+```
