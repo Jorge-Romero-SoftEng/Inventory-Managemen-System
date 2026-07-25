@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "install:ci": "npm ci --ignore-scripts",
+    "audit": "audit-ci --moderate",
+    "prebuild": "npm run audit",
     "dev": "next dev",
     "build": "next build",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
