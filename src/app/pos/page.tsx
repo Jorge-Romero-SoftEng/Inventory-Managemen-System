@@ -9,6 +9,15 @@ import { SaleSummary } from "@/components/pos/SaleSummary";
 import { PaymentDialog } from "@/components/pos/PaymentDialog";
 import type { Product, Customer, CartItem, PriceList } from "@/types";
 
+interface QRData {
+  saleId: number;
+  saleNumber: string;
+  mpOrderId: string;
+  qrData: string;
+  total: number;
+  expiresAt: string;
+}
+
 export default function POSPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -153,6 +162,32 @@ export default function POSPage() {
     }
   }
 
+  async function handleGenerateQR(): Promise<QRData> {
+    const res = await fetch("/api/payments/create-qr", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerId: selectedCustomer?.id || null,
+        userId: 1,
+        items: cart.map((item) => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+          lineTotal: item.lineTotal,
+        })),
+        discount: totalDiscount,
+        tax,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to create QR order");
+
+    const data = await res.json();
+    return data;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
@@ -190,6 +225,7 @@ export default function POSPage() {
         onOpenChange={setShowPayment}
         total={total}
         onPay={handlePayment}
+        onGenerateQR={handleGenerateQR}
         customer={selectedCustomer}
       />
     </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getMercadoPagoOrder } from "@/lib/mercadopago";
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,6 +14,17 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     if (!sale) return NextResponse.json({ error: "Sale not found" }, { status: 404 });
     if (sale.status === "cancelled") return NextResponse.json({ error: "Sale already cancelled" }, { status: 400 });
+
+    // If it's a pending QR sale with an MP order, cancel the MP order first
+    if (sale.status === "pending" && sale.mpOrderId) {
+      try {
+        const order = getMercadoPagoOrder();
+        await order.cancel({ id: sale.mpOrderId });
+      } catch (mpError) {
+        console.error("Failed to cancel MP order:", mpError);
+        // Continue with local cancellation even if MP cancel fails
+      }
+    }
 
     await prisma.$transaction(async (tx) => {
       await tx.sale.update({

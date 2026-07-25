@@ -119,6 +119,9 @@ model Sale {
   paymentMethod String   @map("payment_method") @db.VarChar(50)
   status        String   @default("completed") @db.VarChar(50)
   delivery      Boolean  @default(false)
+  mpOrderId     String?  @map("mp_order_id") @db.VarChar(100)
+  mpQrData      String?  @map("mp_qr_data") @db.Text
+  expiresAt     DateTime? @map("expires_at")
   createdAt     DateTime @default(now()) @map("created_at")
 
   customer   Customer?   @relation(fields: [customerId], references: [id])

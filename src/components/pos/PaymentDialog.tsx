@@ -1,34 +1,134 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import type { Customer } from "@/types";
+
+interface QRData {
+  saleId: number;
+  saleNumber: string;
+  mpOrderId: string;
+  qrData: string;
+  total: number;
+  expiresAt: string;
+}
 
 interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   total: number;
   onPay: (method: string, amount: number, reference?: string) => void;
+  onGenerateQR: () => Promise<QRData>;
   customer: Customer | null;
 }
 
 const paymentMethods = [
   { id: "cash", label: "Cash", color: "bg-green-600 hover:bg-green-500" },
   { id: "transfer", label: "Transfer", color: "bg-blue-600 hover:bg-blue-500" },
+  { id: "qr", label: "QR Code", color: "bg-teal-600 hover:bg-teal-500" },
   { id: "credit", label: "Credit Account", color: "bg-orange-600 hover:bg-orange-500" },
-  { id: "partial", label: "Partial", color: "bg-purple-600 hover:bg-purple-500" },
 ];
 
-export function PaymentDialog({ open, onOpenChange, total, onPay, customer }: PaymentDialogProps) {
+type QRState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "display"; qrData: string; saleId: number }
+  | { status: "polling"; saleId: number }
+  | { status: "success" }
+  | { status: "expired" }
+  | { status: "error"; message: string };
+
+export function PaymentDialog({
+  open,
+  onOpenChange,
+  total,
+  onPay,
+  onGenerateQR,
+  customer,
+}: PaymentDialogProps) {
   const [method, setMethod] = useState("cash");
   const [amount, setAmount] = useState(total);
   const [reference, setReference] = useState("");
+  const [qrState, setQrState] = useState<QRState>({ status: "idle" });
+
+  const resetQr = useCallback(() => {
+    setQrState({ status: "idle" });
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      resetQr();
+    }
+  }, [open, resetQr]);
+
+  const pollSaleStatus = useCallback(
+    async (saleId: number) => {
+      const maxAttempts = 180;
+      let attempts = 0;
+
+      const poll = async (): Promise<void> => {
+        attempts++;
+        if (attempts > maxAttempts) {
+          setQrState({ status: "expired" });
+          return;
+        }
+
+        try {
+          const res = await fetch(`/api/sales/${saleId}`);
+          const sale = await res.json();
+
+          if (sale.status === "completed") {
+            setQrState({ status: "success" });
+            setTimeout(() => {
+              onPay("qr", total);
+              onOpenChange(false);
+            }, 1500);
+            return;
+          }
+
+          if (sale.status === "cancelled") {
+            setQrState({ status: "expired" });
+            return;
+          }
+
+          setTimeout(poll, 5000);
+        } catch {
+          setTimeout(poll, 5000);
+        }
+      };
+
+      poll();
+    },
+    [onPay, total, onOpenChange]
+  );
+
+  async function handleQRGenerate() {
+    setQrState({ status: "loading" });
+
+    try {
+      const data = await onGenerateQR();
+
+      if (!data.qrData) {
+        throw new Error("No QR data returned from Mercado Pago");
+      }
+
+      setQrState({ status: "polling", saleId: data.saleId });
+      pollSaleStatus(data.saleId);
+    } catch (error) {
+      console.error("QR generation error:", error);
+      setQrState({ status: "error", message: "Failed to generate QR code. Please try again." });
+    }
+  }
 
   function handlePay() {
+    if (method === "qr") {
+      handleQRGenerate();
+      return;
+    }
     onPay(method, amount || total, reference || undefined);
     setMethod("cash");
     setAmount(total);
@@ -37,101 +137,200 @@ export function PaymentDialog({ open, onOpenChange, total, onPay, customer }: Pa
 
   function handleMethodChange(m: string) {
     setMethod(m);
-    if (m === "credit" && customer) {
-      setAmount(total);
-    } else {
-      setAmount(total);
+    setAmount(total);
+    if (m !== "qr") {
+      resetQr();
     }
   }
 
   const canPay =
-    method === "cash" ||
-    method === "transfer"
+    method === "cash" || method === "transfer"
       ? amount >= total
       : method === "credit"
       ? customer !== null
+      : method === "qr"
+      ? true
       : amount > 0;
+
+  const isQrFlow = qrState.status !== "idle";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Process Payment</DialogTitle>
+          <DialogTitle>{isQrFlow ? "Scan QR Code to Pay" : "Process Payment"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="text-center p-4 bg-secondary rounded-lg">
-            <div className="text-sm text-muted-foreground">Amount Due</div>
-            <div className="text-3xl font-bold font-mono text-green-400">
-              {formatCurrency(total)}
+
+        {/* QR Flow States */}
+        {isQrFlow && (
+          <div className="space-y-4">
+            <div className="text-center p-4 bg-secondary rounded-lg">
+              <div className="text-sm text-muted-foreground">Amount Due</div>
+              <div className="text-3xl font-bold font-mono text-green-400">
+                {formatCurrency(total)}
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            {paymentMethods.map((pm) => (
-              <button
-                key={pm.id}
-                className={`p-3 rounded-lg text-sm font-medium transition-colors ${
-                  method === pm.id ? pm.color + " text-white" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                } ${pm.id === "credit" && !customer ? "opacity-50 cursor-not-allowed" : ""}`}
-                onClick={() => pm.id !== "credit" || customer ? handleMethodChange(pm.id) : null}
-                disabled={pm.id === "credit" && !customer}
-              >
-                {pm.label}
-              </button>
-            ))}
-          </div>
+            <div className="flex flex-col items-center gap-4 p-4">
+              {qrState.status === "loading" && (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-400"></div>
+                  <div className="text-sm text-muted-foreground">Generating QR code...</div>
+                </div>
+              )}
 
-          {(method === "cash" || method === "transfer" || method === "partial") && (
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Amount</label>
-              <Input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                className="text-xl font-mono h-12"
-                min="0"
-              />
-              {method === "cash" && amount > total && (
-                <div className="text-sm text-muted-foreground mt-1">
-                  Change: <span className="text-green-400 font-mono">{formatCurrency(amount - total)}</span>
+              {qrState.status === "display" && qrState.qrData && (
+                <div className="bg-white p-4 rounded-lg">
+                  <QRCodeSVG value={qrState.qrData} size={200} level="M" />
+                </div>
+              )}
+
+              {qrState.status === "polling" && (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="rounded-full h-12 w-12 bg-teal-500/20 flex items-center justify-center">
+                    <div className="h-6 w-6 rounded-full bg-teal-500 animate-pulse"></div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">Waiting for payment confirmation...</div>
+                  <div className="text-xs text-muted-foreground">The customer should scan the QR code with their Mercado Pago app</div>
+                </div>
+              )}
+
+              {qrState.status === "success" && (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="rounded-full h-16 w-16 bg-green-500/20 flex items-center justify-center">
+                    <svg className="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="text-lg font-bold text-green-400">Payment Confirmed!</div>
+                  <div className="text-sm text-muted-foreground">Sale completed successfully</div>
+                </div>
+              )}
+
+              {(qrState.status === "expired" || qrState.status === "error") && (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="rounded-full h-16 w-16 bg-red-500/20 flex items-center justify-center">
+                    <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <div className="text-lg font-bold text-red-400">
+                    {qrState.status === "expired" ? "QR Code Expired" : "Error"}
+                  </div>
+                  <div className="text-sm text-muted-foreground text-center">
+                    {qrState.status === "expired"
+                      ? "The QR code has expired. Please generate a new one."
+                      : qrState.message}
+                  </div>
                 </div>
               )}
             </div>
-          )}
 
-          {method === "transfer" && (
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Reference Number</label>
-              <Input
-                placeholder="Transfer reference..."
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-              />
-            </div>
-          )}
+            {(qrState.status === "expired" || qrState.status === "error") && (
+              <Button variant="outline" className="w-full" onClick={resetQr}>
+                Try Again
+              </Button>
+            )}
 
-          {method === "credit" && customer && (
-            <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
-              <div className="text-sm font-medium text-orange-400">Credit Account Sale</div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Current balance: {formatCurrency(Number(customer.balance))} | 
-                Credit limit: {formatCurrency(Number(customer.creditLimit))}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                New balance: {formatCurrency(Number(customer.balance) + total)}
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button className="flex-1 h-12 text-base font-bold" onClick={handlePay} disabled={!canPay}>
-              Confirm Payment
-            </Button>
+            {qrState.status === "loading" || qrState.status === "polling" ? (
+              <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+            ) : null}
           </div>
-        </div>
+        )}
+
+        {/* Payment Method Selection */}
+        {!isQrFlow && (
+          <div className="space-y-4">
+            <div className="text-center p-4 bg-secondary rounded-lg">
+              <div className="text-sm text-muted-foreground">Amount Due</div>
+              <div className="text-3xl font-bold font-mono text-green-400">
+                {formatCurrency(total)}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {paymentMethods.map((pm) => (
+                <button
+                  key={pm.id}
+                  className={`p-3 rounded-lg text-sm font-medium transition-colors ${
+                    method === pm.id
+                      ? pm.color + " text-white"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                  } ${pm.id === "credit" && !customer ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={() => pm.id !== "credit" || customer ? handleMethodChange(pm.id) : null}
+                  disabled={pm.id === "credit" && !customer}
+                >
+                  {pm.label}
+                </button>
+              ))}
+            </div>
+
+            {(method === "cash" || method === "transfer" || method === "partial") && (
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Amount</label>
+                <Input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                  className="text-xl font-mono h-12"
+                  min="0"
+                />
+                {method === "cash" && amount > total && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Change: <span className="text-green-400 font-mono">{formatCurrency(amount - total)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {method === "transfer" && (
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Reference Number</label>
+                <Input
+                  placeholder="Transfer reference..."
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                />
+              </div>
+            )}
+
+            {method === "credit" && customer && (
+              <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                <div className="text-sm font-medium text-orange-400">Credit Account Sale</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Current balance: {formatCurrency(Number(customer.balance))} | Credit limit:{" "}
+                  {formatCurrency(Number(customer.creditLimit))}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  New balance: {formatCurrency(Number(customer.balance) + total)}
+                </div>
+              </div>
+            )}
+
+            {method === "qr" && (
+              <div className="p-3 bg-teal-500/10 rounded-lg border border-teal-500/20">
+                <div className="text-sm font-medium text-teal-400">QR Code Payment</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  A QR code will be generated for the customer to scan with their Mercado Pago app.
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  The QR code expires in 15 minutes.
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 h-12 text-base font-bold" onClick={handlePay} disabled={!canPay}>
+                {method === "qr" ? "Generate QR Code" : "Confirm Payment"}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

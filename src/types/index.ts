@@ -69,6 +69,9 @@ export interface Sale {
   paymentMethod: string;
   status: string;
   delivery: boolean;
+  mpOrderId: string | null;
+  mpQrData: string | null;
+  expiresAt: Date | null;
   createdAt: Date;
   customer?: Customer | null;
   items?: SaleItem[];

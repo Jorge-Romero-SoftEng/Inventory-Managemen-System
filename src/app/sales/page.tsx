@@ -72,7 +72,15 @@ export default function SalesPage() {
                         <Badge variant="secondary">{s.paymentMethod}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={s.status === "completed" ? "default" : "destructive"}>
+                        <Badge
+                          variant={
+                            s.status === "completed"
+                              ? "default"
+                              : s.status === "pending"
+                              ? "outline"
+                              : "destructive"
+                          }
+                        >
                           {s.status}
                         </Badge>
                       </TableCell>
@@ -105,6 +113,11 @@ export default function SalesPage() {
             <div className="space-y-2 text-sm mb-4">
               <div>Customer: {selectedSale.customer?.name || "Walk-in"}</div>
               <div>Payment: {selectedSale.paymentMethod}</div>
+              {selectedSale.mpOrderId && (
+                <div className="text-xs text-muted-foreground">
+                  MP Order: <span className="font-mono">{selectedSale.mpOrderId}</span>
+                </div>
+              )}
               <div>Date: {new Date(selectedSale.createdAt).toLocaleString("es-PY")}</div>
             </div>
             <Table>
@@ -135,9 +148,9 @@ export default function SalesPage() {
               <div className="flex justify-between"><span>Tax</span><span className="font-mono">{formatCurrency(Number(selectedSale.tax))}</span></div>
               <div className="flex justify-between font-bold text-lg"><span>Total</span><span className="font-mono text-green-400">{formatCurrency(Number(selectedSale.total))}</span></div>
             </div>
-            {selectedSale.status === "completed" && (
+            {(selectedSale.status === "completed" || selectedSale.status === "pending") && (
               <Button variant="destructive" className="w-full mt-4" onClick={() => cancelSale(selectedSale.id)}>
-                Cancel Sale
+                {selectedSale.status === "pending" ? "Cancel Pending QR Sale" : "Cancel Sale"}
               </Button>
             )}
           </div>
