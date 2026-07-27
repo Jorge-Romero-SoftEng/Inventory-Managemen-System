@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 
 # --- Dependencies ---
 FROM base AS deps
@@ -31,7 +31,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
+# If .next/standalone is present, the runtime image usually should not need the full node_modules directory. Standalone output already includes the minimal files needed to run the app, so copying all dependencies defeats most of the size savings
+# COPY --from=builder /app/node_modules ./node_modules
 
 # Install tsx and prisma CLI for entrypoint (migrations + seeding)
 RUN npm install --no-save tsx prisma

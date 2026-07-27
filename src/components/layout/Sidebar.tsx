@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "@/i18n";
 import {
   ShoppingCart,
   Package,
@@ -14,23 +15,24 @@ import {
   LogOut,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/pos", label: "POS", icon: ShoppingCart },
-  { href: "/products", label: "Products", icon: Package },
-  { href: "/customers", label: "Customers", icon: Users },
-  { href: "/sales", label: "Sales", icon: Receipt },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations();
+
+  const navItems = [
+    { href: "/pos", label: t.nav.pos, icon: ShoppingCart },
+    { href: "/products", label: t.nav.products, icon: Package },
+    { href: "/customers", label: t.nav.customers, icon: Users },
+    { href: "/sales", label: t.nav.sales, icon: Receipt },
+    { href: "/reports", label: t.nav.reports, icon: BarChart3 },
+  ];
 
   return (
     <aside className="w-56 border-r border-border bg-card flex flex-col">
       <div className="p-4 border-b border-border">
         <Link href="/" className="flex items-center gap-2">
           <LayoutDashboard className="h-6 w-6 text-primary" />
-          <span className="font-bold text-lg">WholesalePOS</span>
+          <span className="font-bold text-lg">{t.layout.brand}</span>
         </Link>
       </div>
       <nav className="flex-1 p-2">
@@ -56,7 +58,7 @@ export function Sidebar() {
       <div className="p-2 border-t border-border">
         <button className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground w-full">
           <LogOut className="h-4 w-4" />
-          Logout
+          {t.nav.logout}
         </button>
       </div>
     </aside>

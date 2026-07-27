@@ -10,9 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslations } from "@/i18n";
 import type { Customer } from "@/types";
 
 export default function CustomersPage() {
+  const t = useTranslations();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -69,7 +71,7 @@ export default function CustomersPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Delete this customer?")) return;
+    if (!confirm(t.customers.deleteConfirm)) return;
     await fetch(`/api/customers/${id}`, { method: "DELETE" });
     loadCustomers();
   }
@@ -81,17 +83,17 @@ export default function CustomersPage() {
         <TopBar />
         <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Customers</h1>
+            <h1 className="text-2xl font-bold">{t.customers.title}</h1>
             <Button onClick={openNew}>
               <Plus className="h-4 w-4 mr-1" />
-              New Customer
+              {t.customers.newCustomer}
             </Button>
           </div>
 
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search customers..."
+              placeholder={t.customers.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -103,12 +105,12 @@ export default function CustomersPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Tax ID</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead className="text-right">Credit Limit</TableHead>
-                    <TableHead className="text-right">Balance</TableHead>
+                    <TableHead>{t.common.name}</TableHead>
+                    <TableHead>{t.customers.taxId}</TableHead>
+                    <TableHead>{t.customers.phone}</TableHead>
+                    <TableHead>{t.customers.address}</TableHead>
+                    <TableHead className="text-right">{t.customers.creditLimit}</TableHead>
+                    <TableHead className="text-right">{t.customers.balance}</TableHead>
                     <TableHead className="w-20"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -143,34 +145,34 @@ export default function CustomersPage() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Customer" : "New Customer"}</DialogTitle>
+            <DialogTitle>{editing ? t.customers.editCustomer : t.customers.newCustomer}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-muted-foreground">Name</label>
+              <label className="text-sm text-muted-foreground">{t.common.name}</label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm text-muted-foreground">Tax ID</label>
+                <label className="text-sm text-muted-foreground">{t.customers.taxId}</label>
                 <Input value={form.taxId} onChange={(e) => setForm({ ...form, taxId: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm text-muted-foreground">Phone</label>
+                <label className="text-sm text-muted-foreground">{t.customers.phone}</label>
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-sm text-muted-foreground">Address</label>
+              <label className="text-sm text-muted-foreground">{t.customers.address}</label>
               <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
             </div>
             <div>
-              <label className="text-sm text-muted-foreground">Credit Limit</label>
+              <label className="text-sm text-muted-foreground">{t.customers.creditLimit}</label>
               <Input type="number" value={form.creditLimit} onChange={(e) => setForm({ ...form, creditLimit: e.target.value })} />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)}>Cancel</Button>
-              <Button className="flex-1" onClick={handleSave}>{editing ? "Update" : "Create"}</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)}>{t.common.cancel}</Button>
+              <Button className="flex-1" onClick={handleSave}>{editing ? t.common.update : t.common.create}</Button>
             </div>
           </div>
         </DialogContent>

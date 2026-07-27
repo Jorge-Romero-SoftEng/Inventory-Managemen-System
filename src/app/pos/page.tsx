@@ -7,6 +7,7 @@ import { ProductSearch } from "@/components/pos/ProductSearch";
 import { SaleGrid } from "@/components/pos/SaleGrid";
 import { SaleSummary } from "@/components/pos/SaleSummary";
 import { PaymentDialog } from "@/components/pos/PaymentDialog";
+import { useTranslations } from "@/i18n";
 import type { Product, Customer, CartItem, PriceList } from "@/types";
 
 interface QRData {
@@ -19,6 +20,7 @@ interface QRData {
 }
 
 export default function POSPage() {
+  const t = useTranslations();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [selectedPriceList, setSelectedPriceList] = useState<number>(1);
@@ -158,7 +160,7 @@ export default function POSPage() {
       setShowPayment(false);
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Error processing payment");
+      alert(t.pos.errorPayment);
     }
   }
 

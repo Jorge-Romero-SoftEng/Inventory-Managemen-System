@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslations } from "@/i18n";
 import { User, CreditCard, Trash2 } from "lucide-react";
 import type { CartItem, Customer, PriceList } from "@/types";
 
@@ -40,6 +40,7 @@ export function SaleSummary({
   onPayment,
   onClear,
 }: SaleSummaryProps) {
+  const t = useTranslations();
   const [customerSearch, setCustomerSearch] = useState("");
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [showCustomers, setShowCustomers] = useState(false);
@@ -70,7 +71,7 @@ export function SaleSummary({
       <div className="grid grid-cols-4 gap-3">
         {/* Customer */}
         <div className="col-span-1 relative">
-          <label className="text-xs text-muted-foreground mb-1 block">Customer</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t.pos.customer}</label>
           {selectedCustomer ? (
             <div className="flex items-center justify-between bg-secondary p-2 rounded">
               <div className="flex items-center gap-2">
@@ -78,7 +79,7 @@ export function SaleSummary({
                 <div>
                   <div className="text-sm font-medium">{selectedCustomer.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    Balance: {formatCurrency(Number(selectedCustomer.balance))}
+                    {t.pos.balance} {formatCurrency(Number(selectedCustomer.balance))}
                   </div>
                 </div>
               </div>
@@ -94,7 +95,7 @@ export function SaleSummary({
           ) : (
             <>
               <Input
-                placeholder="Search customer..."
+                placeholder={t.pos.searchCustomer}
                 value={customerSearch}
                 onChange={(e) => setCustomerSearch(e.target.value)}
                 onFocus={() => customerSearch && setShowCustomers(true)}
@@ -124,7 +125,7 @@ export function SaleSummary({
 
         {/* Price List */}
         <div className="col-span-1">
-          <label className="text-xs text-muted-foreground mb-1 block">Price List</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t.pos.priceList}</label>
           <Select
             value={selectedPriceList}
             onChange={(e) => onSelectPriceList(parseInt(e.target.value))}
@@ -140,24 +141,24 @@ export function SaleSummary({
 
         {/* Totals */}
         <div className="col-span-1 space-y-1">
-          <label className="text-xs text-muted-foreground mb-1 block">Summary</label>
+          <label className="text-xs text-muted-foreground mb-1 block">{t.pos.summary}</label>
           <div className="bg-secondary/50 rounded p-2 space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-muted-foreground">{t.common.subtotal}</span>
               <span className="font-mono">{formatCurrency(subtotal)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-red-400">
-                <span>Discount</span>
+                <span>{t.common.discount}</span>
                 <span className="font-mono">-{formatCurrency(discount)}</span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Tax (10%)</span>
+              <span className="text-muted-foreground">{t.common.tax10}</span>
               <span className="font-mono">{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between font-bold border-t border-border pt-1">
-              <span>Total</span>
+              <span>{t.common.total}</span>
               <span className="font-mono text-green-400 text-lg">{formatCurrency(total)}</span>
             </div>
           </div>
@@ -166,7 +167,7 @@ export function SaleSummary({
         {/* Actions */}
         <div className="col-span-1 flex flex-col gap-2 justify-end">
           <div className="text-xs text-muted-foreground text-right">
-            {items.length} items | {totalQuantity} units
+            {items.length} {t.pos.items} | {totalQuantity} {t.pos.units}
           </div>
           <Button
             onClick={onPayment}
@@ -174,11 +175,11 @@ export function SaleSummary({
             className="h-12 text-base font-bold"
           >
             <CreditCard className="h-5 w-5 mr-2" />
-            PAY
+            {t.pos.pay}
           </Button>
           <Button variant="outline" onClick={onClear} disabled={items.length === 0} className="h-9">
             <Trash2 className="h-4 w-4 mr-1" />
-            Clear
+            {t.pos.clear}
           </Button>
         </div>
       </div>

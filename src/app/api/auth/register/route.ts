@@ -2,18 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { signToken } from "@/lib/auth";
 import bcrypt from "bcryptjs";
+import { getTranslations } from "@/i18n/translations";
 
 export async function POST(request: NextRequest) {
+  const t = getTranslations();
   try {
     const { name, email, password } = await request.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json({ error: "Name, email, and password are required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameEmailPasswordRequired }, { status: 400 });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      return NextResponse.json({ error: t.api.emailRegistered }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -41,6 +43,6 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Register error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: t.api.internalError }, { status: 500 });
   }
 }

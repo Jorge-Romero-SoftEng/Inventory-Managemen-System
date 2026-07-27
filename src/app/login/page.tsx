@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, User } from "lucide-react";
+import { useTranslations } from "@/i18n";
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,13 +31,13 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login failed");
+        setError(data.error || t.login.loginFailed);
         return;
       }
 
       router.push("/pos");
     } catch {
-      setError("Connection error");
+      setError(t.login.connectionError);
     } finally {
       setLoading(false);
     }
@@ -45,8 +47,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Wholesale POS</CardTitle>
-          <p className="text-sm text-muted-foreground">Sign in to continue</p>
+          <CardTitle className="text-xl">{t.login.title}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t.login.subtitle}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -57,7 +59,7 @@ export default function LoginPage() {
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 type="email"
-                placeholder="Email"
+                placeholder={t.login.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-9"
@@ -68,7 +70,7 @@ export default function LoginPage() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder={t.login.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="pl-9"
@@ -76,7 +78,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t.login.signingIn : t.login.signIn}
             </Button>
           </form>
         </CardContent>

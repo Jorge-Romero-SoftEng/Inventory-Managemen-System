@@ -3,6 +3,8 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "@/i18n";
+import { formatNumber } from "@/lib/utils";
 import type { CartItem } from "@/types";
 
 interface SaleGridProps {
@@ -13,12 +15,14 @@ interface SaleGridProps {
 }
 
 export function SaleGrid({ items, onUpdateQuantity, onUpdateDiscount, onRemove }: SaleGridProps) {
+  const t = useTranslations();
+
   if (items.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
         <div className="text-center">
           <div className="text-4xl mb-2">🛒</div>
-          <div className="text-lg">Scan or search a product to begin</div>
+          <div className="text-lg">{t.pos.emptyCart}</div>
         </div>
       </div>
     );
@@ -29,11 +33,11 @@ export function SaleGrid({ items, onUpdateQuantity, onUpdateDiscount, onRemove }
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-secondary/50 border-b border-border">
-            <th className="text-left px-3 py-2 font-medium text-muted-foreground">Product</th>
-            <th className="text-right px-3 py-2 font-medium text-muted-foreground w-24">Price</th>
-            <th className="text-center px-3 py-2 font-medium text-muted-foreground w-28">Qty</th>
-            <th className="text-right px-3 py-2 font-medium text-muted-foreground w-28">Discount</th>
-            <th className="text-right px-3 py-2 font-medium text-muted-foreground w-32">Total</th>
+            <th className="text-left px-3 py-2 font-medium text-muted-foreground">{t.pos.product}</th>
+            <th className="text-right px-3 py-2 font-medium text-muted-foreground w-24">{t.common.price}</th>
+            <th className="text-center px-3 py-2 font-medium text-muted-foreground w-28">{t.pos.qty}</th>
+            <th className="text-right px-3 py-2 font-medium text-muted-foreground w-28">{t.common.discount}</th>
+            <th className="text-right px-3 py-2 font-medium text-muted-foreground w-32">{t.common.total}</th>
             <th className="w-10"></th>
           </tr>
         </thead>
@@ -45,7 +49,7 @@ export function SaleGrid({ items, onUpdateQuantity, onUpdateDiscount, onRemove }
                 <div className="text-xs text-muted-foreground">{item.product.sku || item.product.barcode}</div>
               </td>
               <td className="px-3 py-2 text-right font-mono">
-                {item.unitPrice.toLocaleString("es-PY")}
+                {formatNumber(item.unitPrice)}
               </td>
               <td className="px-3 py-2">
                 <Input
@@ -68,7 +72,7 @@ export function SaleGrid({ items, onUpdateQuantity, onUpdateDiscount, onRemove }
                 />
               </td>
               <td className="px-3 py-2 text-right font-mono font-bold">
-                {item.lineTotal.toLocaleString("es-PY")}
+                {formatNumber(item.lineTotal)}
               </td>
               <td className="px-1 py-2">
                 <Button

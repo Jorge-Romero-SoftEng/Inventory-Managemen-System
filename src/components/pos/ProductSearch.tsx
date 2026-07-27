@@ -3,6 +3,8 @@
 import { useState, useEffect, forwardRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useTranslations } from "@/i18n";
+import { formatNumber } from "@/lib/utils";
 import type { Product } from "@/types";
 
 interface ProductSearchProps {
@@ -12,6 +14,7 @@ interface ProductSearchProps {
 
 export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
   ({ onSelectProduct, priceListId }, ref) => {
+    const t = useTranslations();
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Product[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -74,7 +77,7 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={ref}
-            placeholder="Scan barcode or search product..."
+            placeholder={t.pos.searchPlaceholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -95,12 +98,12 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
                 <div>
                   <div className="font-medium">{product.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {product.sku || product.barcode} | {product.stock?.[0]?.quantity || 0} in stock
+                    {product.sku || product.barcode} | {product.stock?.[0]?.quantity || 0} {t.pos.inStock}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-mono font-bold text-green-400">
-                    {getPrice(product).toLocaleString("es-PY")}
+                    {formatNumber(getPrice(product))}
                   </div>
                   <div className="text-xs text-muted-foreground">{product.unit}</div>
                 </div>

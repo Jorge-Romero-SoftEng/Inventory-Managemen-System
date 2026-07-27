@@ -9,9 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Eye, XCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslations } from "@/i18n";
 import type { Sale } from "@/types";
 
 export default function SalesPage() {
+  const t = useTranslations();
   const [sales, setSales] = useState<Sale[]>([]);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
@@ -32,7 +34,7 @@ export default function SalesPage() {
   }
 
   async function cancelSale(id: number) {
-    if (!confirm("Cancel this sale? Stock will be restored.")) return;
+    if (!confirm(t.sales.cancelConfirm)) return;
     await fetch(`/api/sales/${id}/cancel`, { method: "POST" });
     loadSales();
     setSelectedSale(null);
@@ -44,19 +46,19 @@ export default function SalesPage() {
       <div className="flex flex-col flex-1 overflow-hidden">
         <TopBar />
         <div className="flex-1 overflow-auto p-4">
-          <h1 className="text-2xl font-bold mb-4">Sales History</h1>
+          <h1 className="text-2xl font-bold mb-4">{t.sales.title}</h1>
 
           <Card>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Invoice #</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead>{t.sales.invoice}</TableHead>
+                    <TableHead>{t.sales.customer}</TableHead>
+                    <TableHead className="text-right">{t.common.total}</TableHead>
+                    <TableHead>{t.sales.payment}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
+                    <TableHead>{t.sales.date}</TableHead>
                     <TableHead className="w-20"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -64,7 +66,7 @@ export default function SalesPage() {
                   {sales.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell className="font-mono text-xs">{s.saleNumber}</TableCell>
-                      <TableCell>{s.customer?.name || "Walk-in"}</TableCell>
+                      <TableCell>{s.customer?.name || t.common.walkIn}</TableCell>
                       <TableCell className="text-right font-mono font-bold">
                         {formatCurrency(Number(s.total))}
                       </TableCell>
@@ -85,7 +87,7 @@ export default function SalesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {new Date(s.createdAt).toLocaleDateString("es-PY")}
+                        {new Date(s.createdAt).toLocaleDateString("es-AR")}
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewSale(s.id)}>
@@ -111,22 +113,22 @@ export default function SalesPage() {
               </Button>
             </div>
             <div className="space-y-2 text-sm mb-4">
-              <div>Customer: {selectedSale.customer?.name || "Walk-in"}</div>
-              <div>Payment: {selectedSale.paymentMethod}</div>
+              <div>{t.sales.customer}: {selectedSale.customer?.name || t.common.walkIn}</div>
+              <div>{t.sales.payment}: {selectedSale.paymentMethod}</div>
               {selectedSale.mpOrderId && (
                 <div className="text-xs text-muted-foreground">
-                  MP Order: <span className="font-mono">{selectedSale.mpOrderId}</span>
+                  {t.sales.mpOrder} <span className="font-mono">{selectedSale.mpOrderId}</span>
                 </div>
               )}
-              <div>Date: {new Date(selectedSale.createdAt).toLocaleString("es-PY")}</div>
+              <div>{t.sales.date}: {new Date(selectedSale.createdAt).toLocaleString("es-AR")}</div>
             </div>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>{t.sales.product}</TableHead>
+                  <TableHead className="text-right">{t.pos.qty}</TableHead>
+                  <TableHead className="text-right">{t.common.price}</TableHead>
+                  <TableHead className="text-right">{t.common.total}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -134,23 +136,23 @@ export default function SalesPage() {
                   <TableRow key={item.id}>
                     <TableCell>{item.product?.name}</TableCell>
                     <TableCell className="text-right">{Number(item.quantity)}</TableCell>
-                    <TableCell className="text-right font-mono">{Number(item.unitPrice).toLocaleString("es-PY")}</TableCell>
-                    <TableCell className="text-right font-mono font-bold">{Number(item.lineTotal).toLocaleString("es-PY")}</TableCell>
+                    <TableCell className="text-right font-mono">{Number(item.unitPrice)}</TableCell>
+                    <TableCell className="text-right font-mono font-bold">{Number(item.lineTotal)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
             <div className="mt-4 space-y-1 text-sm border-t border-border pt-2">
-              <div className="flex justify-between"><span>Subtotal</span><span className="font-mono">{formatCurrency(Number(selectedSale.subtotal))}</span></div>
+              <div className="flex justify-between"><span>{t.common.subtotal}</span><span className="font-mono">{formatCurrency(Number(selectedSale.subtotal))}</span></div>
               {Number(selectedSale.discount) > 0 && (
-                <div className="flex justify-between text-red-400"><span>Discount</span><span className="font-mono">-{formatCurrency(Number(selectedSale.discount))}</span></div>
+                <div className="flex justify-between text-red-400"><span>{t.common.discount}</span><span className="font-mono">-{formatCurrency(Number(selectedSale.discount))}</span></div>
               )}
-              <div className="flex justify-between"><span>Tax</span><span className="font-mono">{formatCurrency(Number(selectedSale.tax))}</span></div>
-              <div className="flex justify-between font-bold text-lg"><span>Total</span><span className="font-mono text-green-400">{formatCurrency(Number(selectedSale.total))}</span></div>
+              <div className="flex justify-between"><span>{t.common.tax}</span><span className="font-mono">{formatCurrency(Number(selectedSale.tax))}</span></div>
+              <div className="flex justify-between font-bold text-lg"><span>{t.common.total}</span><span className="font-mono text-green-400">{formatCurrency(Number(selectedSale.total))}</span></div>
             </div>
             {(selectedSale.status === "completed" || selectedSale.status === "pending") && (
               <Button variant="destructive" className="w-full mt-4" onClick={() => cancelSale(selectedSale.id)}>
-                {selectedSale.status === "pending" ? "Cancel Pending QR Sale" : "Cancel Sale"}
+                {selectedSale.status === "pending" ? t.sales.cancelPendingQR : t.sales.cancelSale}
               </Button>
             )}
           </div>

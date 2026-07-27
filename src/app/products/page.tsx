@@ -5,14 +5,17 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useTranslations } from "@/i18n";
+import { formatNumber } from "@/lib/utils";
 import type { Product } from "@/types";
 
 export default function ProductsPage() {
+  const t = useTranslations();
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -73,7 +76,7 @@ export default function ProductsPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Delete this product?")) return;
+    if (!confirm(t.products.deleteConfirm)) return;
     await fetch(`/api/products/${id}`, { method: "DELETE" });
     loadProducts();
   }
@@ -85,17 +88,17 @@ export default function ProductsPage() {
         <TopBar />
         <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Products</h1>
+            <h1 className="text-2xl font-bold">{t.products.title}</h1>
             <Button onClick={openNew}>
               <Plus className="h-4 w-4 mr-1" />
-              New Product
+              {t.products.newProduct}
             </Button>
           </div>
 
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search products..."
+              placeholder={t.products.searchPlaceholder}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -107,13 +110,13 @@ export default function ProductsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>SKU</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead>Pack</TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t.products.sku}</TableHead>
+                    <TableHead>{t.common.name}</TableHead>
+                    <TableHead>{t.products.category}</TableHead>
+                    <TableHead>{t.products.unit}</TableHead>
+                    <TableHead>{t.products.pack}</TableHead>
+                    <TableHead className="text-right">{t.products.cost}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
                     <TableHead className="w-20"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -126,11 +129,11 @@ export default function ProductsPage() {
                       <TableCell>{p.unit}</TableCell>
                       <TableCell>{p.packSize}</TableCell>
                       <TableCell className="text-right font-mono">
-                        {Number(p.cost).toLocaleString("es-PY")}
+                        {formatNumber(Number(p.cost))}
                       </TableCell>
                       <TableCell>
                         <Badge variant={p.active ? "default" : "destructive"}>
-                          {p.active ? "Active" : "Inactive"}
+                          {p.active ? t.common.active : t.common.inactive}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -155,40 +158,40 @@ export default function ProductsPage() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingProduct ? "Edit Product" : "New Product"}</DialogTitle>
+            <DialogTitle>{editingProduct ? t.products.editProduct : t.products.newProduct}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm text-muted-foreground">Barcode</label>
+                <label className="text-sm text-muted-foreground">{t.products.barcode}</label>
                 <Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm text-muted-foreground">SKU</label>
+                <label className="text-sm text-muted-foreground">{t.products.sku}</label>
                 <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-sm text-muted-foreground">Name</label>
+              <label className="text-sm text-muted-foreground">{t.common.name}</label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm text-muted-foreground">Unit</label>
+                <label className="text-sm text-muted-foreground">{t.products.unit}</label>
                 <Input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm text-muted-foreground">Pack Size</label>
+                <label className="text-sm text-muted-foreground">{t.products.packSize}</label>
                 <Input type="number" value={form.packSize} onChange={(e) => setForm({ ...form, packSize: e.target.value })} />
               </div>
             </div>
             <div>
-              <label className="text-sm text-muted-foreground">Cost</label>
+              <label className="text-sm text-muted-foreground">{t.products.cost}</label>
               <Input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)}>Cancel</Button>
-              <Button className="flex-1" onClick={handleSave}>{editingProduct ? "Update" : "Create"}</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)}>{t.common.cancel}</Button>
+              <Button className="flex-1" onClick={handleSave}>{editingProduct ? t.common.update : t.common.create}</Button>
             </div>
           </div>
         </DialogContent>

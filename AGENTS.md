@@ -58,7 +58,7 @@ src/
 ├── lib/
 │   ├── auth.ts             # JWT sign/verify, getSession
 │   ├── db.ts               # Singleton PrismaClient
-│   └── utils.ts            # cn(), formatCurrency (PYG), formatNumber
+│   └── utils.ts            # cn(), formatCurrency (ARS), formatNumber
 ├── types/
 │   └── index.ts            # TypeScript interfaces for all entities
 └── middleware.ts            # JWT auth guard (protects all routes except /login, /api/auth)
@@ -119,8 +119,8 @@ src/
 
 ## Currency & Locale
 
-- Currency: Paraguayan Guarani (PYG)
-- Locale: `es-PY`
+- Currency: Argentine Peso (ARS)
+- Locale: `es-AR`
 - Use `formatCurrency(amount)` from `@/lib/utils` for display
 - Use `formatNumber(n)` for number formatting
 

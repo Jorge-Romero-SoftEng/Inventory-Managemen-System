@@ -26,6 +26,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/wholesale_pos?schema=public
       JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      NEXT_PUBLIC_LOCALE: es
     depends_on:
       db:
         condition: service_healthy
