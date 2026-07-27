@@ -22,7 +22,7 @@ npx prisma db push
 npm run db:seed
 # 4. Start dev server
 npm run dev
-Login: admin@wholesale.com / admin123
+Login: ADMIN_USERNAME / ADMIN_PASSWORD
 
 docker run --name my-postgres-new \
   -e POSTGRES_PASSWORD=mysecretpassword \

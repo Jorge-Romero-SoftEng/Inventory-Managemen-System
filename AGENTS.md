@@ -128,4 +128,4 @@ src/
 
 - **Docker:** Multi-stage Dockerfile (deps → builder → runner), Alpine-based, standalone output
 - **Vercel:** Custom buildCommand runs `prisma generate && prisma migrate deploy && next build`
-- **Seed data:** admin@wholesale.com / admin123, 3 categories, 14 products, 5 customers, 3 price lists
+- **Seed data:** ADMIN_USERNAME / ADMIN_PASSWORD, 3 categories, 14 products, 5 customers, 3 price lists

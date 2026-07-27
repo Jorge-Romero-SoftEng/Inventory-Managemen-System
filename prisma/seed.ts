@@ -1,18 +1,24 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+const adminEmail = process.env.ADMIN_USERNAME || '';
+const adminPassword = process.env.ADMIN_PASSWORD || '';
+if (!adminEmail || !adminPassword) {
+  throw new Error("ADMIN_USERNAME and ADMIN_PASSWORD environment variables must be set to seed the database.");
+}
+
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding database...");
 
-  const passwordHash = await bcrypt.hash("admin123", 10);
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
   const user = await prisma.user.upsert({
-    where: { email: "admin@wholesale.com" },
+    where: { email: adminEmail },
     update: {},
     create: {
       name: "Admin",
-      email: "admin@wholesale.com",
+      email: adminEmail,
       passwordHash,
       role: "admin",
     },
@@ -105,7 +111,6 @@ async function main() {
   console.log(`Created ${customers.length} customers`);
 
   console.log("\nSeed completed!");
-  console.log("Login credentials: admin@wholesale.com / admin123");
 }
 
 main()
