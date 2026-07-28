@@ -19,7 +19,6 @@ services:
       retries: 10
 
   app:
-    build: .
     image: ${APP_IMAGE_NAME}:${APP_IMAGE_TAG}
     pull_policy: never
     container_name: ${PROJECT_NAME}-app
