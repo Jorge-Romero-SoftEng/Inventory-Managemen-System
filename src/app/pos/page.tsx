@@ -8,6 +8,7 @@ import { SaleGrid } from "@/components/pos/SaleGrid";
 import { SaleSummary } from "@/components/pos/SaleSummary";
 import { PaymentDialog } from "@/components/pos/PaymentDialog";
 import { useTranslations } from "@/i18n";
+import { getLocale } from "@/i18n/translations";
 import type { Product, Customer, CartItem, PriceList } from "@/types";
 
 interface QRData {
@@ -30,7 +31,7 @@ export default function POSPage() {
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/price-lists")
+    fetch(`/api/price-lists?lang=${getLocale()}`)
       .then((r) => r.json())
       .then((data) => setPriceLists(data))
       .catch(console.error);
@@ -109,7 +110,7 @@ export default function POSPage() {
   const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const totalDiscount = cart.reduce((sum, item) => sum + item.discount, 0);
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const taxRate = 0.1;
+  const taxRate = 0.0;
   const tax = (subtotal - totalDiscount) * taxRate;
   const total = subtotal - totalDiscount + tax;
 

@@ -66,9 +66,9 @@ async function main() {
   console.log(`Created ${createdProducts.length} products with stock`);
 
   const priceLists = await Promise.all([
-    prisma.priceList.upsert({ where: { id: 1 }, update: {}, create: { id: 1, name: "Public" } }),
-    prisma.priceList.upsert({ where: { id: 2 }, update: {}, create: { id: 2, name: "Reseller" } }),
-    prisma.priceList.upsert({ where: { id: 3 }, update: {}, create: { id: 3, name: "Wholesale" } }),
+    prisma.priceList.upsert({ where: { id: 1 }, update: {}, create: { id: 1, nameEs: "Público", nameEn: "Public" } }),
+    prisma.priceList.upsert({ where: { id: 2 }, update: {}, create: { id: 2, nameEs: "Revendedor", nameEn: "Reseller" } }),
+    prisma.priceList.upsert({ where: { id: 3 }, update: {}, create: { id: 3, nameEs: "Mayorista", nameEn: "Wholesale" } }),
   ]);
   console.log(`Created ${priceLists.length} price lists`);
 

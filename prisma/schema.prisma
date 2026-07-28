@@ -72,7 +72,8 @@ model Customer {
 
 model PriceList {
   id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(100)
+  nameEs    String   @db.VarChar(100) @map("name_es")
+  nameEn    String   @db.VarChar(100) @map("name_en")
   active    Boolean  @default(true)
   createdAt DateTime @default(now()) @map("created_at")
 

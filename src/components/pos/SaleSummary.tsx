@@ -154,7 +154,7 @@ export function SaleSummary({
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-muted-foreground">{t.common.tax10}</span>
+              <span className="text-muted-foreground">{t.common.tax}</span>
               <span className="font-mono">{formatCurrency(tax)}</span>
             </div>
             <div className="flex justify-between font-bold border-t border-border pt-1">

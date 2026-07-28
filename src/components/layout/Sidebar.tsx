@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/i18n";
 import {
@@ -17,6 +16,7 @@ import {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations();
 
   const navItems = [
@@ -56,7 +56,13 @@ export function Sidebar() {
         })}
       </nav>
       <div className="p-2 border-t border-border">
-        <button className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground w-full">
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            router.push("/login");
+          }}
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground w-full"
+        >
           <LogOut className="h-4 w-4" />
           {t.nav.logout}
         </button>
