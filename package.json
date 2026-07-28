@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "install:ci": "npm ci --ignore-scripts",
+    "install:ci": "npm ci --ignore-scripts --legacy-peer-deps",
     "audit": "audit-ci --moderate",
     "prebuild": "npm run audit",
     "dev": "next dev",
@@ -44,7 +44,7 @@
     "@eslint/eslintrc": "^0.1.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/react-dom": "^19.1.2",
-    "eslint": "10.8.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "^0.2.4",
     "prisma": "^6.9.0",
     "tsx": "^4.21.0",
