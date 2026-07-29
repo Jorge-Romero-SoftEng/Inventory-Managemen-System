@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getMercadoPagoOrder } from "@/lib/mercadopago";
 import { randomUUID } from "crypto";
+import {
+  calculateSubtotal,
+  calculateDiscountTotal,
+  calculateTotal,
+} from "@/lib/pricing";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,18 +17,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
     }
 
-    const subtotal = items.reduce(
-      (sum: number, item: { lineTotal: number }) => sum + item.lineTotal,
-      0
+    const subtotal = calculateSubtotal(
+      items.map((item: { unitPrice: number; quantity: number }) => ({
+        unitPrice: Number(item.unitPrice),
+        quantity: Number(item.quantity),
+      }))
     );
-    const discountAmount = parseFloat(discount || "0");
-    const taxAmount = parseFloat(tax || "0");
-    const total = subtotal - discountAmount + taxAmount;
+    const discountAmount = calculateDiscountTotal(
+      items.map((item: { discount: number }) => ({
+        discount: Number(item.discount || 0),
+      }))
+    );
+    const taxAmount = Number(tax || 0);
+    const total = calculateTotal(subtotal, discountAmount, taxAmount);
 
     const saleNumber = `INV-${Date.now()}`;
 
     // 1. Create pending sale and reserve stock in a transaction
-    const sale = await prisma.$transaction(async (tx) => {
+    const sale = await prisma.$transaction(async (tx: any) => {
       const newSale = await tx.sale.create({
         data: {
           saleNumber,
@@ -46,9 +57,9 @@ export async function POST(request: NextRequest) {
             saleId: newSale.id,
             productId: item.productId,
             quantity: parseFloat(item.quantity),
-            unitPrice: parseFloat(item.unitPrice),
-            discount: parseFloat(item.discount || "0"),
-            lineTotal: parseFloat(item.lineTotal),
+            unitPrice: Number(item.unitPrice),
+            discount: Number(item.discount || 0),
+            lineTotal: Number(item.lineTotal),
           },
         });
 
