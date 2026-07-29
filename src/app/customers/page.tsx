@@ -84,7 +84,7 @@ export default function CustomersPage() {
         <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.customers.title}</h1>
-            <Button onClick={openNew}>
+            <Button onClick={openNew} aria-label={t.customers.newCustomer}>
               <Plus className="h-4 w-4 mr-1" />
               {t.customers.newCustomer}
             </Button>
@@ -125,10 +125,10 @@ export default function CustomersPage() {
                       <TableCell className="text-right font-mono text-orange-400">{formatCurrency(Number(c.balance))}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)} aria-label={`Edit ${c.name}`}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(c.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(c.id)} aria-label={`Delete ${c.name}`}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
@@ -171,8 +171,8 @@ export default function CustomersPage() {
               <Input type="number" value={form.creditLimit} onChange={(e) => setForm({ ...form, creditLimit: e.target.value })} />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)}>{t.common.cancel}</Button>
-              <Button className="flex-1" onClick={handleSave}>{editing ? t.common.update : t.common.create}</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)} aria-label={t.common.cancel}>{t.common.cancel}</Button>
+              <Button className="flex-1" onClick={handleSave} aria-label={editing ? t.common.update : t.common.create}>{editing ? t.common.update : t.common.create}</Button>
             </div>
           </div>
         </DialogContent>

@@ -27,6 +27,7 @@ const en = {
     pending: "Pending",
     completed: "Completed",
     cancelled: "Cancelled",
+    close: "Close"
   },
   layout: {
     brand: "WholesalePOS",

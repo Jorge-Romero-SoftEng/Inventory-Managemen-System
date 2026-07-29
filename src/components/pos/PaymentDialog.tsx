@@ -229,13 +229,13 @@ export function PaymentDialog({
             </div>
 
             {(qrState.status === "expired" || qrState.status === "error") && (
-              <Button variant="outline" className="w-full" onClick={resetQr}>
+              <Button variant="outline" className="w-full" onClick={resetQr} aria-label={t.payment.tryAgain}>
                 {t.payment.tryAgain}
               </Button>
             )}
 
             {qrState.status === "loading" || qrState.status === "polling" ? (
-              <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)} aria-label={t.common.cancel}>
                 {t.common.cancel}
               </Button>
             ) : null}
@@ -263,6 +263,7 @@ export function PaymentDialog({
                   } ${pm.id === "credit" && !customer ? "opacity-50 cursor-not-allowed" : ""}`}
                   onClick={() => pm.id !== "credit" || customer ? handleMethodChange(pm.id) : null}
                   disabled={pm.id === "credit" && !customer}
+                  aria-label={pm.label}
                 >
                   {pm.label}
                 </button>
@@ -324,10 +325,10 @@ export function PaymentDialog({
             )}
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)} aria-label={t.common.cancel}>
                 {t.common.cancel}
               </Button>
-              <Button className="flex-1 h-12 text-base font-bold" onClick={handlePay} disabled={!canPay}>
+              <Button className="flex-1 h-12 text-base font-bold" onClick={handlePay} disabled={!canPay} aria-label={method === "qr" ? t.payment.generateQR : t.payment.confirmPayment}>
                 {method === "qr" ? t.payment.generateQR : t.payment.confirmPayment}
               </Button>
             </div>

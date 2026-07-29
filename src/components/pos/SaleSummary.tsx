@@ -88,6 +88,7 @@ export function SaleSummary({
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => onSelectCustomer(null)}
+                aria-label="Remove customer"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
@@ -112,6 +113,7 @@ export function SaleSummary({
                         setCustomerSearch("");
                         setShowCustomers(false);
                       }}
+                      aria-label={c.name}
                     >
                       <div className="font-medium">{c.name}</div>
                       <div className="text-xs text-muted-foreground">{c.phone || c.taxId}</div>
@@ -173,11 +175,12 @@ export function SaleSummary({
             onClick={onPayment}
             disabled={items.length === 0}
             className="h-12 text-base font-bold"
+            aria-label={t.pos.pay}
           >
             <CreditCard className="h-5 w-5 mr-2" />
             {t.pos.pay}
           </Button>
-          <Button variant="outline" onClick={onClear} disabled={items.length === 0} className="h-9">
+          <Button variant="outline" onClick={onClear} disabled={items.length === 0} className="h-9" aria-label={t.pos.clear}>
             <Trash2 className="h-4 w-4 mr-1" />
             {t.pos.clear}
           </Button>

@@ -90,7 +90,7 @@ export default function SalesPage() {
                         {new Date(s.createdAt).toLocaleDateString("es-AR")}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewSale(s.id)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => viewSale(s.id)} aria-label={`View ${s.saleNumber}`}>
                           <Eye className="h-3 w-3" />
                         </Button>
                       </TableCell>
@@ -108,7 +108,7 @@ export default function SalesPage() {
           <div className="bg-card rounded-lg border border-border p-6 max-w-lg w-full max-h-[80vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">{selectedSale.saleNumber}</h2>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedSale(null)}>
+              <Button variant="ghost" size="icon" onClick={() => setSelectedSale(null)} aria-label={t.common.close || "Close"}>
                 <XCircle className="h-5 w-5" />
               </Button>
             </div>
@@ -151,7 +151,7 @@ export default function SalesPage() {
               <div className="flex justify-between font-bold text-lg"><span>{t.common.total}</span><span className="font-mono text-green-400">{formatCurrency(Number(selectedSale.total))}</span></div>
             </div>
             {(selectedSale.status === "completed" || selectedSale.status === "pending") && (
-              <Button variant="destructive" className="w-full mt-4" onClick={() => cancelSale(selectedSale.id)}>
+              <Button variant="destructive" className="w-full mt-4" onClick={() => cancelSale(selectedSale.id)} aria-label={selectedSale.status === "pending" ? t.sales.cancelPendingQR : t.sales.cancelSale}>
                 {selectedSale.status === "pending" ? t.sales.cancelPendingQR : t.sales.cancelSale}
               </Button>
             )}

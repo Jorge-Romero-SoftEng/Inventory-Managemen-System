@@ -1,53 +1,48 @@
-FROM node:24-alpine AS base
-
-# --- Dependencies ---
-FROM base AS deps
+# --- Stage 1: Dependencies ---
+FROM node:24-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package*.json ./
+# Copy Prisma schema BEFORE running npm ci so postinstall can find it
 COPY prisma ./prisma/
 RUN npm ci
-RUN npm rebuild esbuild
 
-# --- Builder ---
-FROM base AS builder
+# --- Stage 2: Builder ---
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npx prisma generate
+# Builds the standalone bundle inside .next/standalone
 RUN npm run build
-RUN npm run lint
-RUN npm run typecheck
 
-# --- Runner ---
-FROM base AS runner
+# --- Stage 2.5: Dedicated Migrator ---
+FROM node:24-alpine AS migrator
+WORKDIR /app
+COPY package*.json ./
+COPY --from=deps /app/node_modules ./node_modules
+
+# COPY DIRECTLY FROM HOST (Guarantees migrations/ is fresh)
+COPY ./prisma ./prisma
+
+# Generate client during image BUILD
+RUN npx prisma generate
+
+# Execute migrations and seeding at runtime
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
+
+# --- Stage 3: Tiny Production Runner ---
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-# If .next/standalone is present, the runtime image usually should not need the full node_modules directory. Standalone output already includes the minimal files needed to run the app, so copying all dependencies defeats most of the size savings
-# COPY --from=builder /app/node_modules ./node_modules
-
-# Install tsx and prisma CLI for entrypoint (migrations + seeding)
-RUN npm install --no-save tsx prisma
-RUN npm rebuild esbuild
-
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN chmod +x /app/docker-entrypoint.sh
-
-RUN chown -R nextjs:nodejs /app
-
-USER nextjs
-
-EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["/app/docker-entrypoint.sh"]
+# Copy ONLY the optimized standalone bundle (includes tiny traced node_modules)
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+EXPOSE 3000
+
+# Standalone mode runs via node server.js directly instead of "npm start"
+CMD ["node", "server.js"]

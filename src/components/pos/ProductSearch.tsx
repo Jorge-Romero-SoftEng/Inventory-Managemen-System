@@ -94,6 +94,7 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
                   index === selectedIndex ? "bg-secondary" : ""
                 }`}
                 onClick={() => handleSelect(product)}
+                aria-label={product.name}
               >
                 <div>
                   <div className="font-medium">{product.name}</div>

@@ -1,4 +1,15 @@
 services:
+  migration:
+    build:
+      context: .
+      target: migrator
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?schema=public
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
   db:
     image: postgres:16-alpine
     pull_policy: if_not_present
@@ -19,7 +30,9 @@ services:
       retries: 10
 
   app:
-    build: .
+    build:
+      context: .
+      target: runner
     image: ${APP_IMAGE_NAME}:${APP_IMAGE_TAG}
     pull_policy: never
     container_name: ${PROJECT_NAME}-app
@@ -30,11 +43,9 @@ services:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?schema=public
       JWT_SECRET: ${JWT_SECRET}
       NEXT_PUBLIC_LOCALE: ${NEXT_PUBLIC_LOCALE}
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     depends_on:
-      db:
-        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

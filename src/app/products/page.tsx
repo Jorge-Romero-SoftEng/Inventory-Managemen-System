@@ -89,7 +89,7 @@ export default function ProductsPage() {
         <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.products.title}</h1>
-            <Button onClick={openNew}>
+            <Button onClick={openNew} aria-label={t.products.newProduct}>
               <Plus className="h-4 w-4 mr-1" />
               {t.products.newProduct}
             </Button>
@@ -138,10 +138,10 @@ export default function ProductsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`}>
                             <Pencil className="h-3 w-3" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(p.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(p.id)} aria-label={`Delete ${p.name}`}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
@@ -190,8 +190,8 @@ export default function ProductsPage() {
               <Input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)}>{t.common.cancel}</Button>
-              <Button className="flex-1" onClick={handleSave}>{editingProduct ? t.common.update : t.common.create}</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)} aria-label={t.common.cancel}>{t.common.cancel}</Button>
+              <Button className="flex-1" onClick={handleSave} aria-label={editingProduct ? t.common.update : t.common.create}>{editingProduct ? t.common.update : t.common.create}</Button>
             </div>
           </div>
         </DialogContent>

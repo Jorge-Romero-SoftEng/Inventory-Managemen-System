@@ -80,6 +80,7 @@ export function SaleGrid({ items, onUpdateQuantity, onUpdateDiscount, onRemove }
                   size="icon"
                   className="h-8 w-8 text-red-400 hover:text-red-300"
                   onClick={() => onRemove(item.product.id)}
+                  aria-label={`Remove ${item.product.name}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

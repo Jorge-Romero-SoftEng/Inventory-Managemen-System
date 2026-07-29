@@ -65,15 +65,15 @@ export default function ReportsPage() {
           <h1 className="text-2xl font-bold mb-4">{t.reports.title}</h1>
 
           <div className="flex gap-2 mb-4">
-            <Button variant={activeTab === "daily" ? "default" : "outline"} onClick={() => setActiveTab("daily")}>
+            <Button variant={activeTab === "daily" ? "default" : "outline"} onClick={() => setActiveTab("daily")} aria-label={t.reports.dailySales}>
               <ShoppingCart className="h-4 w-4 mr-1" />
               {t.reports.dailySales}
             </Button>
-            <Button variant={activeTab === "stock" ? "default" : "outline"} onClick={() => setActiveTab("stock")}>
+            <Button variant={activeTab === "stock" ? "default" : "outline"} onClick={() => setActiveTab("stock")} aria-label={t.reports.lowStock}>
               <AlertTriangle className="h-4 w-4 mr-1" />
               {t.reports.lowStock}
             </Button>
-            <Button variant={activeTab === "balances" ? "default" : "outline"} onClick={() => setActiveTab("balances")}>
+            <Button variant={activeTab === "balances" ? "default" : "outline"} onClick={() => setActiveTab("balances")} aria-label={t.reports.balances}>
               <Users className="h-4 w-4 mr-1" />
               {t.reports.balances}
             </Button>

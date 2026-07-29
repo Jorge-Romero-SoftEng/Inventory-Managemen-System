@@ -77,7 +77,7 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading} aria-label={loading ? t.login.signingIn : t.login.signIn}>
               {loading ? t.login.signingIn : t.login.signIn}
             </Button>
           </form>
