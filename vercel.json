@@ -1,4 +1,4 @@
 {
   "buildCommand": "echo postinstall && npm run postinstall && echo dbpush && npm run db:push:vercel && echo dbseed && npm run db:seed && echo buildfinished && echo typescript && npm ls typescript && npm run build",
-  "installCommand": "echo installci && npm run install:ci && echo omit && npm config get omit && echo production && npm config get production && echo npmconfiglist && npm config list"
+  "installCommand": "echo installci && npm run install:ci && echo omit && npm config get omit && echo production && npm config get production && echo npmconfiglist && npm config list -l"
 }
