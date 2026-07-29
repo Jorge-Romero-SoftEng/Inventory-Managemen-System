@@ -1,4 +1,4 @@
 {
   "buildCommand": "npm run postinstall && npm run db:push:vercel && npm run db:seed && npm run build",
-  "installCommand": "npm run install:ci"
+  "installCommand": "npm run test && npm run install:ci"
 }
