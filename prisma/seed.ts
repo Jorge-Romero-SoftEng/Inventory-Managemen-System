@@ -15,7 +15,7 @@ async function main() {
   const passwordHash = await bcrypt.hash(adminPassword, 10);
   const user = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: {},
+    update: { email: adminEmail,passwordHash },
     create: {
       name: "Admin",
       email: adminEmail,
@@ -66,9 +66,9 @@ async function main() {
   console.log(`Created ${createdProducts.length} products with stock`);
 
   const priceLists = await Promise.all([
-    prisma.priceList.upsert({ where: { id: 1 }, update: {}, create: { id: 1, nameEs: "Público", nameEn: "Public" } }),
-    prisma.priceList.upsert({ where: { id: 2 }, update: {}, create: { id: 2, nameEs: "Revendedor", nameEn: "Reseller" } }),
-    prisma.priceList.upsert({ where: { id: 3 }, update: {}, create: { id: 3, nameEs: "Mayorista", nameEn: "Wholesale" } }),
+    prisma.priceList.upsert({ where: { id: 1 }, update: { nameEs: "Público", nameEn: "Public" }, create: { id: 1, nameEs: "Público", nameEn: "Public" } }),
+    prisma.priceList.upsert({ where: { id: 2 }, update: { nameEs: "Revendedor", nameEn: "Reseller" }, create: { id: 2, nameEs: "Revendedor", nameEn: "Reseller" } }),
+    prisma.priceList.upsert({ where: { id: 3 }, update: { nameEs: "Mayorista", nameEn: "Wholesale" }, create: { id: 3, nameEs: "Mayorista", nameEn: "Wholesale" } }),
   ]);
   console.log(`Created ${priceLists.length} price lists`);
 
