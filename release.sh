@@ -65,7 +65,7 @@ echo "copying install file inside release"
 cp export/install.sh $RELEASE_FOLDER
 
 echo "copying docker-compose.yml and .env files inside $RELEASE_FOLDER folder"
-cp docker-compose.yml .env Dockerfile $RELEASE_FOLDER
+cp docker-compose.yml .env Dockerfile package*.json $RELEASE_FOLDER
 
 echo "copying prisma folder inside $RELEASE_FOLDER folder"
 cp -r prisma/. "$PRISMA_FOLDER/"

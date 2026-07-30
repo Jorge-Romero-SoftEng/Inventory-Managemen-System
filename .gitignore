@@ -39,5 +39,6 @@ next-env.d.ts
 prisma/migrations/
 *.tar
 export/release/prisma
+export/release/package*.json
 
 *.tar.gz
