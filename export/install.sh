@@ -7,6 +7,7 @@ docker compose down
 echo "Loading images..."
 docker load -i postgres.tar
 docker load -i app.tar
+docker load -i migrations.tar
 
 echo "Buiding and Running containers..."
 docker compose up -d

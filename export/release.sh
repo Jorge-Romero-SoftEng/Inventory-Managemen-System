@@ -26,8 +26,14 @@ echo "Created new directory: $DIST_FOLDER"
 
 echo "saving app.tar"
 docker save -o release/app.tar inventory-management-system-app:latest
+
 echo "saving postgres.tar"
 docker save -o release/postgres.tar postgres:16-alpine
+
+echo "saving migrations.tar"
+docker save -o release/migrations.tar inventory-management-system-migration:latest
+
+
 echo "copying install file inside release"
 cp install.sh release/
 
@@ -36,3 +42,5 @@ cp ../docker-compose.yml ../.env release/
 
 echo "generating .tar.gz file inside dist folder"
 tar -czf dist/release.tar.gz -C release .
+
+echo "Done!"
