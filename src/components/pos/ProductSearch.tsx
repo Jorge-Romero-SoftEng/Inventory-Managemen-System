@@ -144,7 +144,7 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
 
     function getPrice(product: Product): number {
       const priceEntry = product.prices?.find((p) => p.priceListId === priceListId);
-      return priceEntry ? Number(priceEntry.price) : Number(product.cost) * 1.3;
+      return priceEntry ? Number(priceEntry.price) : Number(product.cost);
     }
 
     return (

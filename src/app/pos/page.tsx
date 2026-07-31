@@ -56,7 +56,7 @@ export default function POSPage() {
         }
 
         const priceEntry = product.prices?.find((p) => p.priceListId === selectedPriceList);
-        const unitPrice = priceEntry ? Number(priceEntry.price) : Number(product.cost) * 1.3;
+        const unitPrice = priceEntry ? Number(priceEntry.price) : Number(product.cost);
 
         return [
           ...prev,
