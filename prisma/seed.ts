@@ -73,21 +73,22 @@ async function main() {
   console.log(`Created ${priceLists.length} price lists`);
 
   for (const product of createdProducts) {
-    const basePrice = Number(product.cost) * 1.3;
+    const basePrice = Number(product.cost);
+    const price = Math.round(basePrice * 100) / 100;
     await prisma.productPrice.upsert({
       where: { productId_priceListId: { productId: product.id, priceListId: 1 } },
-      update: {},
-      create: { productId: product.id, priceListId: 1, price: Math.round(basePrice) },
+      update: { price },
+      create: { productId: product.id, priceListId: 1, price },
     });
     await prisma.productPrice.upsert({
       where: { productId_priceListId: { productId: product.id, priceListId: 2 } },
-      update: {},
-      create: { productId: product.id, priceListId: 2, price: Math.round(basePrice * 0.9) },
+      update: { price },
+      create: { productId: product.id, priceListId: 2, price },
     });
     await prisma.productPrice.upsert({
       where: { productId_priceListId: { productId: product.id, priceListId: 3 } },
-      update: {},
-      create: { productId: product.id, priceListId: 3, price: Math.round(basePrice * 0.8) },
+      update: { price },
+      create: { productId: product.id, priceListId: 3, price },
     });
   }
   console.log("Created product prices for all price lists");
