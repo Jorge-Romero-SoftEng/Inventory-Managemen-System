@@ -5,11 +5,14 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
+    const barcode = searchParams.get("barcode");
     const categoryId = searchParams.get("categoryId");
     const active = searchParams.get("active");
 
     const where: Record<string, unknown> = {};
-    if (search) {
+    if (barcode) {
+      where.barcode = barcode;
+    } else if (search) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
         { barcode: { contains: search, mode: "insensitive" } },

@@ -60,6 +60,10 @@ const en = {
   },
   pos: {
     searchPlaceholder: "Scan barcode or search product...",
+    scanPlaceholder: "Scan barcode...",
+    scanMode: "Scan Mode",
+    manualMode: "Search Mode",
+    productNotFound: "Product not found",
     inStock: "in stock",
     emptyCart: "Scan or search a product to begin",
     product: "Product",

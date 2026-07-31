@@ -60,6 +60,10 @@ const es = {
   },
   pos: {
     searchPlaceholder: "Escanee codigo de barras o busque producto...",
+    scanPlaceholder: "Escanea el codigo de barras...",
+    scanMode: "Modo Escaneo",
+    manualMode: "Modo Busqueda",
+    productNotFound: "Producto no encontrado",
     inStock: "en stock",
     emptyCart: "Escanee o busque un producto para comenzar",
     product: "Producto",
