@@ -34,11 +34,8 @@ model Category {
 model Product {
   id         Int      @id @default(autoincrement())
   barcode    String?  @unique @db.VarChar(100)
-  sku        String?  @unique @db.VarChar(100)
   name       String   @db.VarChar(255)
   categoryId Int?     @map("category_id")
-  unit       String   @db.VarChar(50)
-  packSize   Decimal  @default(1) @map("pack_size") @db.Decimal(12, 3)
   cost       Decimal  @default(0) @db.Decimal(12, 2)
   active     Boolean  @default(true)
   createdAt  DateTime @default(now()) @map("created_at")

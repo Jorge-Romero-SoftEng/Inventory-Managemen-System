@@ -1,11 +1,8 @@
 export interface Product {
   id: number;
   barcode: string | null;
-  sku: string | null;
   name: string;
   categoryId: number | null;
-  unit: string;
-  packSize: number;
   cost: number;
   active: boolean;
   createdAt: Date;

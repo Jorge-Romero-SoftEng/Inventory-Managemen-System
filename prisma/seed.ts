@@ -33,26 +33,26 @@ async function main() {
   console.log(`Created ${categories.length} categories`);
 
   const products = [
-    { barcode: "7891234560001", sku: "FLO-001", name: "Harina Leudante 1kg", categoryId: categories[0].id, unit: "bag", packSize: 1, cost: 3500 },
-    { barcode: "7891234560002", sku: "FLO-002", name: "Harina 000 1kg", categoryId: categories[0].id, unit: "bag", packSize: 1, cost: 3200 },
-    { barcode: "7891234560003", sku: "FLO-003", name: "Harina Integral 1kg", categoryId: categories[0].id, unit: "bag", packSize: 1, cost: 4000 },
-    { barcode: "7891234560004", sku: "FLO-004", name: "Harina Leudante 5kg", categoryId: categories[0].id, unit: "bag", packSize: 5, cost: 15000 },
-    { barcode: "7891234560005", sku: "FLO-005", name: "Harina 000 50kg", categoryId: categories[0].id, unit: "bag", packSize: 50, cost: 120000 },
-    { barcode: "7891234560010", sku: "AZU-001", name: "Azucar Estandar 1kg", categoryId: categories[1].id, unit: "bag", packSize: 1, cost: 4200 },
-    { barcode: "7891234560011", sku: "AZU-002", name: "Azucar Impalpable 1kg", categoryId: categories[1].id, unit: "bag", packSize: 1, cost: 5500 },
-    { barcode: "7891234560012", sku: "AZU-003", name: "Azucar Estandar 5kg", categoryId: categories[1].id, unit: "bag", packSize: 5, cost: 18000 },
-    { barcode: "7891234560013", sku: "AZU-004", name: "Azucar Rubia 1kg", categoryId: categories[1].id, unit: "bag", packSize: 1, cost: 5000 },
-    { barcode: "7891234560014", sku: "AZU-005", name: "Azucar Estandar 50kg", categoryId: categories[1].id, unit: "bag", packSize: 50, cost: 160000 },
-    { barcode: "7891234560020", sku: "YER-001", name: "Yerba Mate Marca 1kg", categoryId: categories[2].id, unit: "bag", packSize: 1, cost: 8000 },
-    { barcode: "7891234560021", sku: "YER-002", name: "Yerba Mate Despalada 1kg", categoryId: categories[2].id, unit: "bag", packSize: 1, cost: 10000 },
-    { barcode: "7891234560022", sku: "YER-003", name: "Yerba Mate Organica 500g", categoryId: categories[2].id, unit: "bag", packSize: 0.5, cost: 12000 },
-    { barcode: "7891234560023", sku: "YER-004", name: "Yerba Mate Suave 1kg", categoryId: categories[2].id, unit: "bag", packSize: 1, cost: 9500 },
+    { barcode: "7891234560001", name: "Harina Leudante 1kg", categoryId: categories[0].id, cost: 3500 },
+    { barcode: "7891234560002", name: "Harina 000 1kg", categoryId: categories[0].id, cost: 3200 },
+    { barcode: "7891234560003", name: "Harina Integral 1kg", categoryId: categories[0].id, cost: 4000 },
+    { barcode: "7891234560004", name: "Harina Leudante 5kg", categoryId: categories[0].id, cost: 15000 },
+    { barcode: "7891234560005", name: "Harina 000 50kg", categoryId: categories[0].id, cost: 120000 },
+    { barcode: "7891234560010", name: "Azucar Estandar 1kg", categoryId: categories[1].id, cost: 4200 },
+    { barcode: "7891234560011", name: "Azucar Impalpable 1kg", categoryId: categories[1].id, cost: 5500 },
+    { barcode: "7891234560012", name: "Azucar Estandar 5kg", categoryId: categories[1].id, cost: 18000 },
+    { barcode: "7891234560013", name: "Azucar Rubia 1kg", categoryId: categories[1].id, cost: 5000 },
+    { barcode: "7891234560014", name: "Azucar Estandar 50kg", categoryId: categories[1].id, cost: 160000 },
+    { barcode: "7891234560020", name: "Yerba Mate Marca 1kg", categoryId: categories[2].id, cost: 8000 },
+    { barcode: "7891234560021", name: "Yerba Mate Despalada 1kg", categoryId: categories[2].id, cost: 10000 },
+    { barcode: "7891234560022", name: "Yerba Mate Organica 500g", categoryId: categories[2].id, cost: 12000 },
+    { barcode: "7891234560023", name: "Yerba Mate Suave 1kg", categoryId: categories[2].id, cost: 9500 },
   ];
 
   const createdProducts = [];
   for (const p of products) {
     const product = await prisma.product.upsert({
-      where: { sku: p.sku! },
+      where: { barcode: p.barcode! },
       update: {},
       create: p,
     });

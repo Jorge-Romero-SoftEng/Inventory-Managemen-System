@@ -99,14 +99,13 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
                 <div>
                   <div className="font-medium">{product.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {product.sku || product.barcode} | {product.stock?.[0]?.quantity || 0} {t.pos.inStock}
+                    {product.barcode || "-"} | {product.stock?.[0]?.quantity || 0} {t.pos.inStock}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="font-mono font-bold text-green-400">
                     {formatNumber(getPrice(product))}
                   </div>
-                  <div className="text-xs text-muted-foreground">{product.unit}</div>
                 </div>
               </button>
             ))}

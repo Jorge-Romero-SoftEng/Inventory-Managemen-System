@@ -27,7 +27,8 @@ const en = {
     pending: "Pending",
     completed: "Completed",
     cancelled: "Cancelled",
-    close: "Close"
+    close: "Close",
+    loading: "Loading..."
   },
   layout: {
     brand: "WholesalePOS",
@@ -41,6 +42,7 @@ const en = {
   nav: {
     pos: "POS",
     products: "Products",
+    categories: "Categories",
     customers: "Customers",
     sales: "Sales",
     reports: "Reports",
@@ -110,14 +112,23 @@ const en = {
     newProduct: "New Product",
     editProduct: "Edit Product",
     searchPlaceholder: "Search products...",
-    sku: "SKU",
     category: "Category",
-    unit: "Unit",
-    pack: "Pack",
     cost: "Cost",
     barcode: "Barcode",
-    packSize: "Pack Size",
     deleteConfirm: "Delete this product?",
+    categoryPlaceholder: "Select category",
+    categorySearch: "Search category...",
+    createCategory: "Create category",
+    noCategory: "No category",
+    categoryNewPlaceholder: "New category name",
+  },
+  categories: {
+    title: "Categories",
+    newCategory: "New Category",
+    editCategory: "Edit Category",
+    searchPlaceholder: "Search categories...",
+    products: "Products",
+    deleteConfirm: "Delete this category? Associated products will have no category.",
   },
   customers: {
     title: "Customers",

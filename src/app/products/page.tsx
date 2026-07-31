@@ -5,10 +5,12 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CategoryCombobox } from "@/components/products/CategoryCombobox";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useTranslations } from "@/i18n";
 import { formatNumber } from "@/lib/utils";
@@ -22,12 +24,10 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({
     barcode: "",
-    sku: "",
     name: "",
-    categoryId: "",
-    unit: "bag",
-    packSize: "1",
+    categoryId: null as number | null,
     cost: "0",
+    active: true,
   });
 
   const loadProducts = useCallback(async () => {
@@ -43,7 +43,7 @@ export default function ProductsPage() {
 
   function openNew() {
     setEditingProduct(null);
-    setForm({ barcode: "", sku: "", name: "", categoryId: "", unit: "bag", packSize: "1", cost: "0" });
+    setForm({ barcode: "", name: "", categoryId: null, cost: "0", active: true });
     setShowForm(true);
   }
 
@@ -51,12 +51,10 @@ export default function ProductsPage() {
     setEditingProduct(p);
     setForm({
       barcode: p.barcode || "",
-      sku: p.sku || "",
       name: p.name,
-      categoryId: p.categoryId?.toString() || "",
-      unit: p.unit,
-      packSize: p.packSize.toString(),
+      categoryId: p.categoryId,
       cost: p.cost.toString(),
+      active: p.active,
     });
     setShowForm(true);
   }
@@ -110,11 +108,9 @@ export default function ProductsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t.products.sku}</TableHead>
+                    <TableHead>{t.products.barcode}</TableHead>
                     <TableHead>{t.common.name}</TableHead>
                     <TableHead>{t.products.category}</TableHead>
-                    <TableHead>{t.products.unit}</TableHead>
-                    <TableHead>{t.products.pack}</TableHead>
                     <TableHead className="text-right">{t.products.cost}</TableHead>
                     <TableHead>{t.common.status}</TableHead>
                     <TableHead className="w-20"></TableHead>
@@ -123,11 +119,9 @@ export default function ProductsPage() {
                 <TableBody>
                   {products.map((p) => (
                     <TableRow key={p.id}>
-                      <TableCell className="font-mono text-xs">{p.sku || p.barcode}</TableCell>
+                      <TableCell className="font-mono text-xs">{p.barcode || "-"}</TableCell>
                       <TableCell className="font-medium">{p.name}</TableCell>
                       <TableCell>{p.category?.name || "-"}</TableCell>
-                      <TableCell>{p.unit}</TableCell>
-                      <TableCell>{p.packSize}</TableCell>
                       <TableCell className="text-right font-mono">
                         {formatNumber(Number(p.cost))}
                       </TableCell>
@@ -161,33 +155,31 @@ export default function ProductsPage() {
             <DialogTitle>{editingProduct ? t.products.editProduct : t.products.newProduct}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm text-muted-foreground">{t.products.barcode}</label>
-                <Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-sm text-muted-foreground">{t.products.sku}</label>
-                <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
-              </div>
+            <div>
+              <label className="text-sm text-muted-foreground">{t.products.barcode}</label>
+              <Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
             </div>
             <div>
               <label className="text-sm text-muted-foreground">{t.common.name}</label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm text-muted-foreground">{t.products.unit}</label>
-                <Input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-sm text-muted-foreground">{t.products.packSize}</label>
-                <Input type="number" value={form.packSize} onChange={(e) => setForm({ ...form, packSize: e.target.value })} />
-              </div>
+            <div>
+              <label className="text-sm text-muted-foreground">{t.products.category}</label>
+              <CategoryCombobox
+                value={form.categoryId}
+                onChange={(categoryId) => setForm({ ...form, categoryId })}
+              />
             </div>
             <div>
               <label className="text-sm text-muted-foreground">{t.products.cost}</label>
               <Input type="number" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <label className="text-sm text-muted-foreground">{t.common.status}</label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">{form.active ? t.common.active : t.common.inactive}</span>
+                <Switch checked={form.active} onCheckedChange={(active) => setForm({ ...form, active })} />
+              </div>
             </div>
             <div className="flex gap-2 pt-2">
               <Button variant="outline" className="flex-1" onClick={() => setShowForm(false)} aria-label={t.common.cancel}>{t.common.cancel}</Button>

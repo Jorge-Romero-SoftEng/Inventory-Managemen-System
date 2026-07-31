@@ -27,7 +27,8 @@ const es = {
     pending: "Pendiente",
     completed: "Completado",
     cancelled: "Cancelado",
-    close: "Cerrar"
+    close: "Cerrar",
+    loading: "Cargando..."
   },
   layout: {
     brand: "WholesalePOS",
@@ -41,6 +42,7 @@ const es = {
   nav: {
     pos: "Punto de Venta",
     products: "Productos",
+    categories: "Categorias",
     customers: "Clientes",
     sales: "Ventas",
     reports: "Reportes",
@@ -110,14 +112,23 @@ const es = {
     newProduct: "Nuevo Producto",
     editProduct: "Editar Producto",
     searchPlaceholder: "Buscar productos...",
-    sku: "SKU",
     category: "Categoria",
-    unit: "Unidad",
-    pack: "Paquete",
     cost: "Costo",
     barcode: "Codigo de barras",
-    packSize: "Tamano del paquete",
     deleteConfirm: "¿Eliminar este producto?",
+    categoryPlaceholder: "Seleccionar categoria",
+    categorySearch: "Buscar categoria...",
+    createCategory: "Crear categoria",
+    noCategory: "Sin categoria",
+    categoryNewPlaceholder: "Nombre de la nueva categoria",
+  },
+  categories: {
+    title: "Categorias",
+    newCategory: "Nueva Categoria",
+    editCategory: "Editar Categoria",
+    searchPlaceholder: "Buscar categorias...",
+    products: "Productos",
+    deleteConfirm: "¿Eliminar esta categoria? Los productos asociados quedaran sin categoria.",
   },
   customers: {
     title: "Clientes",

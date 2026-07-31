@@ -21,7 +21,7 @@ interface DailyReport {
 interface LowStockItem {
   id: number;
   quantity: number;
-  product: { name: string; sku: string; category?: { name: string } };
+  product: { name: string; barcode: string | null; category?: { name: string } };
 }
 
 interface BalanceReport {
@@ -160,7 +160,7 @@ export default function ReportsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t.products.sku}</TableHead>
+                      <TableHead>{t.products.barcode}</TableHead>
                       <TableHead>{t.pos.product}</TableHead>
                       <TableHead>{t.products.category}</TableHead>
                       <TableHead className="text-right">{t.common.quantity}</TableHead>
@@ -169,7 +169,7 @@ export default function ReportsPage() {
                   <TableBody>
                     {lowStock.map((item) => (
                       <TableRow key={item.id}>
-                        <TableCell className="font-mono text-xs">{item.product.sku}</TableCell>
+                        <TableCell className="font-mono text-xs">{item.product.barcode || "-"}</TableCell>
                         <TableCell className="font-medium">{item.product.name}</TableCell>
                         <TableCell>{item.product.category?.name || "-"}</TableCell>
                         <TableCell className="text-right font-mono text-orange-400 font-bold">

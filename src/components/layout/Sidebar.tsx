@@ -12,6 +12,7 @@ import {
   BarChart3,
   LayoutDashboard,
   LogOut,
+  Tags,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -22,6 +23,7 @@ export function Sidebar() {
   const navItems = [
     { href: "/pos", label: t.nav.pos, icon: ShoppingCart },
     { href: "/products", label: t.nav.products, icon: Package },
+    { href: "/categories", label: t.nav.categories, icon: Tags },
     { href: "/customers", label: t.nav.customers, icon: Users },
     { href: "/sales", label: t.nav.sales, icon: Receipt },
     { href: "/reports", label: t.nav.reports, icon: BarChart3 },

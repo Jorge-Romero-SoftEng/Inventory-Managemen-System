@@ -28,17 +28,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const body = await request.json();
-    const { barcode, sku, name, categoryId, unit, packSize, cost, active } = body;
+    const { barcode, name, categoryId, cost, active } = body;
 
     const product = await prisma.product.update({
       where: { id: parseInt(id) },
       data: {
         ...(barcode !== undefined && { barcode: barcode || null }),
-        ...(sku !== undefined && { sku: sku || null }),
         ...(name !== undefined && { name }),
-        ...(categoryId !== undefined && { categoryId: categoryId ? parseInt(categoryId) : null }),
-        ...(unit !== undefined && { unit }),
-        ...(packSize !== undefined && { packSize: parseFloat(packSize) }),
+        ...(categoryId !== undefined && { categoryId: categoryId ? Number(categoryId) : null }),
         ...(cost !== undefined && { cost: parseFloat(cost) }),
         ...(active !== undefined && { active }),
         updatedAt: new Date(),

@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
         { barcode: { contains: search, mode: "insensitive" } },
-        { sku: { contains: search, mode: "insensitive" } },
       ];
     }
     if (categoryId) where.categoryId = parseInt(categoryId);
@@ -39,20 +38,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { barcode, sku, name, categoryId, unit, packSize, cost, active } = body;
+    const { barcode, name, categoryId, cost, active } = body;
 
-    if (!name || !unit) {
-      return NextResponse.json({ error: "Name and unit are required" }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
     const product = await prisma.product.create({
       data: {
         barcode: barcode || null,
-        sku: sku || null,
         name,
-        categoryId: categoryId ? parseInt(categoryId) : null,
-        unit,
-        packSize: packSize ? parseFloat(packSize) : 1,
+        categoryId: categoryId ? Number(categoryId) : null,
         cost: cost ? parseFloat(cost) : 0,
         active: active !== false,
       },

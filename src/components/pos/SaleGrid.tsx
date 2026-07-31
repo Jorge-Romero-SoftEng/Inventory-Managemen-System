@@ -46,7 +46,7 @@ export function SaleGrid({ items, onUpdateQuantity, onUpdateDiscount, onRemove }
             <tr key={item.product.id} className="border-b border-border hover:bg-secondary/20">
               <td className="px-3 py-2">
                 <div className="font-medium">{item.product.name}</div>
-                <div className="text-xs text-muted-foreground">{item.product.sku || item.product.barcode}</div>
+                <div className="text-xs text-muted-foreground">{item.product.barcode || "-"}</div>
               </td>
               <td className="px-3 py-2 text-right font-mono">
                 {formatNumber(item.unitPrice)}

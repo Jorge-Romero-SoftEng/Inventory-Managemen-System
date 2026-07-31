@@ -107,7 +107,7 @@ src/
 |---|---|
 | User | System users/admins |
 | Category | Product categories |
-| Product | Product catalog (barcode, sku, name, cost, unit, packSize) |
+| Product | Product catalog (barcode, name, cost) |
 | Customer | Wholesale customers with credit tracking |
 | PriceList | Named pricing tiers |
 | ProductPrice | Price per product per price list |
