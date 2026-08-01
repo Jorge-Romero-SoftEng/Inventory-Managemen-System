@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.customersView);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
     const active = searchParams.get("active");
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { deletedAt: null };
     if (search) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
@@ -30,6 +34,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.customersCreate);
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { name, taxId, address, phone, creditLimit } = body;

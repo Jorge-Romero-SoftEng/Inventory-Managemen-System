@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function POST(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.salesCreate);
+  if (denied) return denied;
+
   try {
     const { saleId, method, amount, reference } = await request.json();
 

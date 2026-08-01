@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET() {
+  const denied = await requirePolicy(POLICY.reportsView);
+  if (denied) return denied;
+
   try {
     const customers = await prisma.customer.findMany({
-      where: { balance: { gt: 0 } },
+      where: { balance: { gt: 0 }, deletedAt: null },
       orderBy: { balance: "desc" },
     });
 
     const totalBalance = await prisma.customer.aggregate({
-      where: { balance: { gt: 0 } },
+      where: { balance: { gt: 0 }, deletedAt: null },
       _sum: { balance: true },
     });
 

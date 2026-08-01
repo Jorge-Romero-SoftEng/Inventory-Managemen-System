@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.reportsView);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date") || new Date().toISOString().split("T")[0];

@@ -9,18 +9,98 @@ if (!adminEmail || !adminPassword) {
 
 const prisma = new PrismaClient();
 
+const POLICY_CATALOG = [
+  { key: "products.view", nameEs: "Ver productos", nameEn: "View products", module: "products" },
+  { key: "products.create", nameEs: "Crear productos", nameEn: "Create products", module: "products" },
+  { key: "products.update", nameEs: "Editar productos", nameEn: "Edit products", module: "products" },
+  { key: "products.delete", nameEs: "Eliminar productos", nameEn: "Delete products", module: "products" },
+  { key: "categories.view", nameEs: "Ver categorias", nameEn: "View categories", module: "categories" },
+  { key: "categories.create", nameEs: "Crear categorias", nameEn: "Create categories", module: "categories" },
+  { key: "categories.update", nameEs: "Editar categorias", nameEn: "Edit categories", module: "categories" },
+  { key: "categories.delete", nameEs: "Eliminar categorias", nameEn: "Delete categories", module: "categories" },
+  { key: "customers.view", nameEs: "Ver clientes", nameEn: "View customers", module: "customers" },
+  { key: "customers.create", nameEs: "Crear clientes", nameEn: "Create customers", module: "customers" },
+  { key: "customers.update", nameEs: "Editar clientes", nameEn: "Edit customers", module: "customers" },
+  { key: "customers.delete", nameEs: "Eliminar clientes", nameEn: "Delete customers", module: "customers" },
+  { key: "priceLists.view", nameEs: "Ver listas de precios", nameEn: "View price lists", module: "priceLists" },
+  { key: "priceLists.manage", nameEs: "Gestionar listas de precios", nameEn: "Manage price lists", module: "priceLists" },
+  { key: "sales.create", nameEs: "Realizar ventas", nameEn: "Create sales", module: "sales" },
+  { key: "sales.view", nameEs: "Ver ventas", nameEn: "View sales", module: "sales" },
+  { key: "sales.cancel", nameEs: "Cancelar ventas", nameEn: "Cancel sales", module: "sales" },
+  { key: "stock.view", nameEs: "Ver stock", nameEn: "View stock", module: "stock" },
+  { key: "stock.adjust", nameEs: "Ajustar stock", nameEn: "Adjust stock", module: "stock" },
+  { key: "reports.view", nameEs: "Ver reportes", nameEn: "View reports", module: "reports" },
+  { key: "users.view", nameEs: "Ver usuarios", nameEn: "View users", module: "users" },
+  { key: "users.manage", nameEs: "Gestionar usuarios", nameEn: "Manage users", module: "users" },
+  { key: "roles.view", nameEs: "Ver roles", nameEn: "View roles", module: "roles" },
+  { key: "roles.manage", nameEs: "Gestionar roles", nameEn: "Manage roles", module: "roles" },
+];
+
+async function seedRolesAndPolicies() {
+  const policies = await Promise.all(
+    POLICY_CATALOG.map((p) =>
+      prisma.policy.upsert({
+        where: { key: p.key },
+        update: { nameEs: p.nameEs, nameEn: p.nameEn, module: p.module },
+        create: p,
+      })
+    )
+  );
+  console.log(`Created ${policies.length} policies`);
+
+  const allKeys = POLICY_CATALOG.map((p) => p.key);
+  const cashierKeys = [
+    "products.view",
+    "categories.view",
+    "customers.view",
+    "priceLists.view",
+    "sales.create",
+    "sales.view",
+    "stock.view",
+    "reports.view",
+  ];
+
+  const roles = [
+    { name: "Admin", description: "Administrador con acceso completo", isSystem: true, keys: allKeys },
+    { name: "Cajero", description: "Cajero de mostrador", isSystem: true, keys: cashierKeys },
+  ];
+
+  for (const r of roles) {
+    const role = await prisma.role.upsert({
+      where: { name: r.name },
+      update: { description: r.description, isSystem: r.isSystem, deletedAt: null },
+      create: { name: r.name, description: r.description, isSystem: r.isSystem },
+    });
+
+    const policyIds = policies.filter((p) => r.keys.includes(p.key)).map((p) => p.id);
+    await prisma.rolePolicy.deleteMany({ where: { roleId: role.id } });
+    if (policyIds.length > 0) {
+      await prisma.rolePolicy.createMany({
+        data: policyIds.map((policyId) => ({ roleId: role.id, policyId })),
+        skipDuplicates: true,
+      });
+    }
+    console.log(`Synced role: ${r.name} (${policyIds.length} policies)`);
+  }
+
+  return policies;
+}
+
 async function main() {
   console.log("Seeding database...");
+
+  await seedRolesAndPolicies();
+  const adminRole = await prisma.role.findUniqueOrThrow({ where: { name: "Admin" } });
 
   const passwordHash = await bcrypt.hash(adminPassword, 10);
   const user = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { email: adminEmail,passwordHash },
+    update: { email: adminEmail, passwordHash, roleId: adminRole.id, active: true, deletedAt: null },
     create: {
       name: "Admin",
       email: adminEmail,
       passwordHash,
-      role: "admin",
+      roleId: adminRole.id,
     },
   });
   console.log(`Created user: ${user.name}`);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/i18n";
+import { useMe } from "@/hooks/useMe";
 import {
   ShoppingCart,
   Package,
@@ -13,21 +14,28 @@ import {
   LayoutDashboard,
   LogOut,
   Tags,
+  Shield,
+  UserCog,
 } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
+  const me = useMe();
+  const policies = new Set(me?.policies ?? []);
+  const gate = (key: string) => !me || policies.has(key);
 
   const navItems = [
-    { href: "/pos", label: t.nav.pos, icon: ShoppingCart },
-    { href: "/products", label: t.nav.products, icon: Package },
-    { href: "/categories", label: t.nav.categories, icon: Tags },
-    { href: "/customers", label: t.nav.customers, icon: Users },
-    { href: "/sales", label: t.nav.sales, icon: Receipt },
-    { href: "/reports", label: t.nav.reports, icon: BarChart3 },
-  ];
+    { href: "/pos", label: t.nav.pos, icon: ShoppingCart, policy: "sales.create" },
+    { href: "/products", label: t.nav.products, icon: Package, policy: "products.view" },
+    { href: "/categories", label: t.nav.categories, icon: Tags, policy: "categories.view" },
+    { href: "/customers", label: t.nav.customers, icon: Users, policy: "customers.view" },
+    { href: "/sales", label: t.nav.sales, icon: Receipt, policy: "sales.view" },
+    { href: "/reports", label: t.nav.reports, icon: BarChart3, policy: "reports.view" },
+    { href: "/users", label: t.nav.users, icon: UserCog, policy: "users.view" },
+    { href: "/roles", label: t.nav.roles, icon: Shield, policy: "roles.view" },
+  ].filter((item) => gate(item.policy));
 
   return (
     <aside className="w-56 border-r border-border bg-card flex flex-col">

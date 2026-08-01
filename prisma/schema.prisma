@@ -8,23 +8,67 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  name         String   @db.VarChar(150)
-  email        String?  @unique @db.VarChar(255)
-  passwordHash String   @map("password_hash") @db.Text
-  role         String   @default("admin") @db.VarChar(50)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @map("updated_at")
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(150)
+  email        String?   @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.Text
+  roleId       Int?      @map("role_id")
+  active       Boolean   @default(true)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @map("updated_at")
 
+  role  Role? @relation(fields: [roleId], references: [id])
   sales Sale[]
 
   @@map("users")
 }
 
-model Category {
+model Role {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(50)
+  description String?   @db.Text
+  isSystem    Boolean   @default(false) @map("is_system")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+
+  users        User[]
+  rolePolicies RolePolicy[]
+
+  @@map("roles")
+}
+
+model Policy {
   id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(100)
+  key       String   @unique @db.VarChar(100)
+  nameEs    String   @db.VarChar(150) @map("name_es")
+  nameEn    String   @db.VarChar(150) @map("name_en")
+  module    String   @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at")
+
+  rolePolicies RolePolicy[]
+
+  @@map("policies")
+}
+
+model RolePolicy {
+  id       Int @id @default(autoincrement())
+  roleId   Int @map("role_id")
+  policyId Int @map("policy_id")
+
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  policy Policy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, policyId])
+  @@map("role_policies")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(100)
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   products Product[]
 
@@ -32,14 +76,15 @@ model Category {
 }
 
 model Product {
-  id         Int      @id @default(autoincrement())
-  barcode    String?  @unique @db.VarChar(100)
-  name       String   @db.VarChar(255)
-  categoryId Int?     @map("category_id")
-  cost       Decimal  @default(0) @db.Decimal(12, 2)
-  active     Boolean  @default(true)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @default(now()) @map("updated_at")
+  id         Int       @id @default(autoincrement())
+  barcode    String?   @unique @db.VarChar(100)
+  name       String    @db.VarChar(255)
+  categoryId Int?      @map("category_id")
+  cost       Decimal   @default(0) @db.Decimal(12, 2)
+  active     Boolean   @default(true)
+  deletedAt  DateTime? @map("deleted_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @map("updated_at")
 
   category     Category?      @relation(fields: [categoryId], references: [id])
   prices       ProductPrice[]
@@ -51,16 +96,17 @@ model Product {
 }
 
 model Customer {
-  id           Int      @id @default(autoincrement())
-  name         String   @db.VarChar(255)
-  taxId        String?  @map("tax_id") @db.VarChar(50)
-  address      String?  @db.Text
-  phone        String?  @db.VarChar(50)
-  creditLimit  Decimal  @default(0) @map("credit_limit") @db.Decimal(12, 2)
-  balance      Decimal  @default(0) @db.Decimal(12, 2)
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @map("updated_at")
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(255)
+  taxId        String?   @map("tax_id") @db.VarChar(50)
+  address      String?   @db.Text
+  phone        String?   @db.VarChar(50)
+  creditLimit  Decimal   @default(0) @map("credit_limit") @db.Decimal(12, 2)
+  balance      Decimal   @default(0) @db.Decimal(12, 2)
+  active       Boolean   @default(true)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @map("updated_at")
 
   sales Sale[]
 
@@ -68,11 +114,12 @@ model Customer {
 }
 
 model PriceList {
-  id        Int    @id @default(autoincrement())
-  nameEs    String @default("") @db.VarChar(100) @map("name_es")
-  nameEn    String @default("") @db.VarChar(100) @map("name_en")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
+  id        Int       @id @default(autoincrement())
+  nameEs    String    @default("") @db.VarChar(100) @map("name_es")
+  nameEn    String    @default("") @db.VarChar(100) @map("name_en")
+  active    Boolean   @default(true)
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   prices ProductPrice[]
 

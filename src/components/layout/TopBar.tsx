@@ -2,6 +2,7 @@
 
 import { Wifi, WifiOff } from "lucide-react";
 import { useTranslations } from "@/i18n";
+import { useMe } from "@/hooks/useMe";
 
 interface TopBarProps {
   saleNumber?: string;
@@ -11,6 +12,9 @@ interface TopBarProps {
 
 export function TopBar({ saleNumber, user = "Admin", isOnline = true }: TopBarProps) {
   const t = useTranslations();
+  const me = useMe();
+  const label = me ? (me.role ? `${me.name} · ${me.role}` : me.name) : user;
+
   return (
     <header className="h-12 border-b border-border bg-card flex items-center justify-between px-4">
       <div className="flex items-center gap-4">
@@ -22,7 +26,7 @@ export function TopBar({ saleNumber, user = "Admin", isOnline = true }: TopBarPr
         )}
       </div>
       <div className="flex items-center gap-4">
-        <span className="text-xs text-muted-foreground">{user}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
         <div className="flex items-center gap-1">
           {isOnline ? (
             <Wifi className="h-3 w-3 text-green-500" />

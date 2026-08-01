@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.reportsView);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const threshold = parseFloat(searchParams.get("threshold") || "10");
 
     const lowStock = await prisma.stock.findMany({
-      where: { quantity: { lte: threshold } },
+      where: { quantity: { lte: threshold }, product: { deletedAt: null } },
       include: { product: { include: { category: true } } },
       orderBy: { quantity: "asc" },
     });

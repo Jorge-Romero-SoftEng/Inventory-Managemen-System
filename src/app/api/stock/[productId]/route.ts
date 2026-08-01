@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ productId: string }> }) {
+  const denied = await requirePolicy(POLICY.stockView);
+  if (denied) return denied;
+
   try {
     const { productId } = await params;
     const stock = await prisma.stock.findMany({

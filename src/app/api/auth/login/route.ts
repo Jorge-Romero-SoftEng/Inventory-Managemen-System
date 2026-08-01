@@ -13,8 +13,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: t.api.emailAndPasswordRequired }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { role: true },
+    });
+    if (!user || user.deletedAt || !user.active) {
       return NextResponse.json({ error: t.api.invalidCredentials }, { status: 401 });
     }
 
@@ -23,14 +26,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: t.api.invalidCredentials }, { status: 401 });
     }
 
+    const roleName = user.role?.name ?? null;
     const token = await signToken({
       userId: user.id,
       email: user.email!,
       name: user.name,
-      role: user.role,
+      role: roleName,
+      roleId: user.roleId,
     });
 
-    const response = NextResponse.json({ success: true, user: { id: user.id, name: user.name, role: user.role } });
+    const response = NextResponse.json({
+      success: true,
+      user: { id: user.id, name: user.name, role: roleName, roleId: user.roleId },
+    });
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

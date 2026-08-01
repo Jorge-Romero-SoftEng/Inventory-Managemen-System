@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.productsView);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
@@ -9,7 +13,7 @@ export async function GET(request: NextRequest) {
     const categoryId = searchParams.get("categoryId");
     const active = searchParams.get("active");
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { deletedAt: null };
     if (barcode) {
       where.barcode = barcode;
     } else if (search) {
@@ -39,6 +43,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.productsCreate);
+  if (denied) return denied;
+
   try {
     const body = await request.json();
     const { barcode, name, categoryId, cost, active } = body;
@@ -63,6 +70,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
+      return NextResponse.json({ error: "A product with that barcode already exists" }, { status: 409 });
+    }
     console.error("Create product error:", error);
     return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }

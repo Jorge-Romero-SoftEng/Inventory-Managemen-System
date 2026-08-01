@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requirePolicy(POLICY.productsView);
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const product = await prisma.product.findUnique({
@@ -13,7 +17,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       },
     });
 
-    if (!product) {
+    if (!product || product.deletedAt) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
@@ -25,6 +29,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requirePolicy(POLICY.productsUpdate);
+  if (denied) return denied;
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -50,11 +57,20 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requirePolicy(POLICY.productsDelete);
+  if (denied) return denied;
+
   try {
     const { id } = await params;
-    await prisma.product.delete({ where: { id: parseInt(id) } });
+    await prisma.product.update({
+      where: { id: parseInt(id) },
+      data: { deletedAt: new Date() },
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
     console.error("Delete product error:", error);
     return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
   }

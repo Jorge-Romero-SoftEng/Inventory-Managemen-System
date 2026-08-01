@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requirePolicy, POLICY } from "@/lib/policies";
 
 export async function GET(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.priceListsView);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const lang = searchParams.get("lang") === "en" ? "en" : "es";
 
     const priceLists = await prisma.priceList.findMany({
+      where: { deletedAt: null },
       select: {
         id: true,
         nameEs: true,
@@ -32,6 +37,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.priceListsManage);
+  if (denied) return denied;
+
   try {
     const { nameEs, nameEn } = await request.json();
     if (!nameEs || !nameEn) {

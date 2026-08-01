@@ -9,7 +9,8 @@ export interface TokenPayload {
   userId: number;
   email: string;
   name: string;
-  role: string;
+  role: string | null;
+  roleId: number | null;
 }
 
 export async function signToken(payload: TokenPayload): Promise<string> {

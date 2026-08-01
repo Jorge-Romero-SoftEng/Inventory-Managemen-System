@@ -118,7 +118,6 @@ export default function POSPage() {
     try {
       const saleData = {
         customerId: selectedCustomer?.id || null,
-        userId: 1,
         items: cart.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -171,7 +170,6 @@ export default function POSPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         customerId: selectedCustomer?.id || null,
-        userId: 1,
         items: cart.map((item) => ({
           productId: item.product.id,
           productName: item.product.name,

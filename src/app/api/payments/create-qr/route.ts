@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { requirePolicy, POLICY } from "@/lib/policies";
 import { getMercadoPagoOrder } from "@/lib/mercadopago";
 import { randomUUID } from "crypto";
 import {
@@ -9,9 +11,17 @@ import {
 } from "@/lib/pricing";
 
 export async function POST(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.salesCreate);
+  if (denied) return denied;
+
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { customerId, userId, items, discount, tax } = body;
+    const { customerId, items, discount, tax } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
@@ -39,7 +49,7 @@ export async function POST(request: NextRequest) {
         data: {
           saleNumber,
           customerId: customerId ? parseInt(customerId) : null,
-          userId: userId ? parseInt(userId) : null,
+          userId: session.userId,
           subtotal,
           discount: discountAmount,
           tax: taxAmount,

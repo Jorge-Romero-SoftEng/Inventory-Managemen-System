@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/lib/auth";
+import { requirePolicy, POLICY } from "@/lib/policies";
 import {
   calculateSubtotal,
   calculateDiscountTotal,
@@ -7,6 +9,9 @@ import {
 } from "@/lib/pricing";
 
 export async function GET(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.salesView);
+  if (denied) return denied;
+
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "50");
@@ -39,9 +44,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requirePolicy(POLICY.salesCreate);
+  if (denied) return denied;
+
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { customerId, userId, items, paymentMethod, discount, tax, delivery } = body;
+    const { customerId, items, paymentMethod, discount, tax, delivery } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
@@ -72,7 +85,7 @@ export async function POST(request: NextRequest) {
         data: {
           saleNumber,
           customerId: customerId ? parseInt(customerId) : null,
-          userId: userId ? parseInt(userId) : null,
+          userId: session.userId,
           subtotal,
           discount: discountAmount,
           tax: taxAmount,
