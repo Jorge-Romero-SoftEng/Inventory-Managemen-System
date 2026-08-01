@@ -34,7 +34,7 @@ FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=80
 ENV HOSTNAME=app
 
 # Copy ONLY the optimized standalone bundle (includes tiny traced node_modules)
@@ -42,7 +42,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-EXPOSE 3000
+EXPOSE 80
 
 # Standalone mode runs via node server.js directly instead of "npm start"
 CMD ["node", "server.js"]
