@@ -1,3 +1,5 @@
+name: ${PROJECT_NAME}-security
+
 services:
   migration:
     build:
@@ -10,6 +12,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - security_net
+
   db:
     image: postgres:16-alpine
     platform: linux/amd64
@@ -20,8 +25,6 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
-    ports:
-      - "${DB_PORT}:${DB_PORT}"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -29,17 +32,17 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - security_net
 
   app:
     build:
       context: .
       target: runner
-    image: ${APP_IMAGE_NAME}:${APP_IMAGE_TAG}
+    image: ${APP_IMAGE_NAME}-security:${APP_IMAGE_TAG}
     pull_policy: never
-    container_name: ${PROJECT_NAME}-app
+    container_name: ${PROJECT_NAME}-app-security
     restart: unless-stopped
-    ports:
-      - "${APP_PORT}:${APP_PORT}"
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?schema=public
       JWT_SECRET: ${JWT_SECRET}
@@ -47,6 +50,50 @@ services:
     depends_on:
       migration:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://app:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    networks:
+      - security_net
+
+  nettacker:
+    image: owasp/nettacker:latest
+    platform: linux/amd64
+    pull_policy: if_not_present
+    container_name: ${PROJECT_NAME}-nettacker
+    restart: "no"
+    entrypoint: ["poetry", "run", "python3", "./nettacker.py"]
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - ./security-reports:/reports
+    command:
+      - -i
+      - http://app:3000
+      - -m
+      - port_scan,http_status_scan,dir_scan,admin_scan,clickjacking_vuln,content_security_policy_vuln,content_type_options_vuln,http_options_enabled_vuln,server_version_vuln,http_cookie_vuln
+      - -o
+      - /reports/app_security.html
+      - -d
+      - -t
+      - "5"
+      - -M
+      - "5"
+      - --set-hardware-usage
+      - low
+      - -v
+    networks:
+      - security_net
+
+networks:
+  security_net:
+    name: ${PROJECT_NAME}-security-net
+    driver: bridge
+    internal: true
 
 volumes:
   pgdata:

@@ -35,7 +35,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
+ENV HOSTNAME=app
 
 # Copy ONLY the optimized standalone bundle (includes tiny traced node_modules)
 COPY --from=builder /app/public ./public
