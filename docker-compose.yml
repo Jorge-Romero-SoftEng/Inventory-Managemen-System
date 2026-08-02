@@ -59,42 +59,30 @@ services:
     networks:
       - security_net
 
-# If you prefer mapping out specific infrastructure, CMS, and advanced security header checks while avoiding aggressive password brute-forcing, expand your list with these exact modules
-# -m
-# - port_scan,http_status_scan,dir_scan,admin_scan,clickjacking_vuln,content_security_policy_vuln,content_type_options_vuln,http_options_enabled_vuln,server_version_vuln,http_cookie_vuln,subdomain_scan,wappalyzer_scan,cms_detection_scan,pma_scan,wordpress_version_scan,wp_plugin_scan,joomla_version_scan,drupal_version_scan,ssl_expiring_certificate_scan,cors_vuln,heartbleed_vuln
-# - all
-
-  nettacker:
-    image: owasp/nettacker:latest
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
     platform: linux/amd64
-    pull_policy: if_not_present
-    container_name: ${PROJECT_NAME}-nettacker
-    restart: "no"
-    entrypoint: ["poetry", "run", "python3", "./nettacker.py"]
+    container_name: ${PROJECT_NAME}-zap
+
     depends_on:
       app:
         condition: service_healthy
+
     volumes:
-      - ./security-reports:/reports
+      - ./security/zap-plan-realistic.yaml:/zap/zap-plan-realistic.yaml:ro
+      - ./security/reports:/zap/reports
+      - ./security/zap-work:/zap/work
+
     command:
-      - -i
-      - http://app
-      - -m
-      - all
-      - -x
-      - ftp_brute,ssh_brute,http_form_brute,smtp_brute,smb_brute,telnet_brute,vnc_brute,all_brute
-      - -o
-      - /reports/app_security.html
-      - -d
-      - -t
-      - "5"
-      - -M
-      - "5"
-      - --set-hardware-usage
-      - low
-      - -v
+      - zap.sh
+      - -cmd
+      - -autorun
+      - /zap/zap-plan-realistic.yaml
+
     networks:
       - security_net
+
+    restart: "no"
 
 networks:
   security_net:
@@ -104,3 +92,4 @@ networks:
 
 volumes:
   pgdata:
+  zapdata:

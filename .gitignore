@@ -43,5 +43,7 @@ prisma/migrations/
 *.tar
 export/release/prisma
 export/release/package*.json
+security/reports/
+security/zap-work
 
 *.tar.gz

@@ -1,0 +1,28 @@
+env:
+  contexts:
+    - name: POS
+      urls:
+        - http://app
+      includePaths:
+        - http://app.*
+
+jobs:
+  # 2. Discover React routes
+  - type: spiderAjax
+    parameters:
+      context: POS
+
+  # 3. Passive security analysis
+  - type: passiveScan-wait
+
+  # 4. Active attack simulation
+  - type: activeScan
+    parameters:
+      context: POS
+
+  # 5. Generate reports
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: /zap/reports
+      reportFile: report.html
