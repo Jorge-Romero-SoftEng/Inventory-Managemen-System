@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,11 +40,9 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <h1 className="text-2xl font-bold mb-4">{t.sales.title}</h1>
 
           <Card>
@@ -101,7 +98,6 @@ export default function SalesPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       {selectedSale && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
@@ -158,6 +154,6 @@ export default function SalesPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

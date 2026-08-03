@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,11 +127,9 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.products.title}</h1>
             <Button onClick={openNew} aria-label={t.products.newProduct}>
@@ -164,6 +161,52 @@ export default function ProductsPage() {
                 </option>
               ))}
             </Select>
+          </div>
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{t.products.itemsPerPage}</span>
+              <Select
+                value={String(pageSize)}
+                onChange={(e) =>
+                  setPageSize(e.target.value === "all" ? "all" : Number(e.target.value))
+                }
+                className="w-24"
+                aria-label={t.products.itemsPerPage}
+              >
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">{t.common.all}</option>
+              </Select>
+            </div>
+            {pageSize !== "all" && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={page <= 1}
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  aria-label={t.common.previous}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {t.common.page} {page} {t.common.of} {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                  aria-label={t.common.next}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
           <Card>
@@ -217,54 +260,7 @@ export default function ProductsPage() {
               </Table>
             </CardContent>
           </Card>
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{t.products.itemsPerPage}</span>
-              <Select
-                value={String(pageSize)}
-                onChange={(e) =>
-                  setPageSize(e.target.value === "all" ? "all" : Number(e.target.value))
-                }
-                className="w-24"
-                aria-label={t.products.itemsPerPage}
-              >
-                <option value="10">10</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="all">{t.common.all}</option>
-              </Select>
-            </div>
-            {pageSize !== "all" && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={page <= 1}
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  aria-label={t.common.previous}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  {t.common.page} {page} {t.common.of} {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={page >= totalPages}
-                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-                  aria-label={t.common.next}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
         </div>
-      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
@@ -308,6 +304,6 @@ export default function ProductsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

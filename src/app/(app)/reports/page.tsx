@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,11 +56,9 @@ export default function ReportsPage() {
   }, [activeTab, date]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <h1 className="text-2xl font-bold mb-4">{t.reports.title}</h1>
 
           <div className="flex gap-2 mb-4">
@@ -221,7 +218,6 @@ export default function ReportsPage() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </>
   );
 }

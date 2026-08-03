@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,11 +67,9 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.categories.title}</h1>
             <Button onClick={openNew} aria-label={t.categories.newCategory}>
@@ -123,7 +120,6 @@ export default function CategoriesPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
@@ -142,6 +138,6 @@ export default function CategoriesPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

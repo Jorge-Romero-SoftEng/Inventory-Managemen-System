@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,11 +136,9 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.users.title}</h1>
             {canManage && (
@@ -224,7 +221,6 @@ export default function UsersPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
@@ -273,6 +269,6 @@ export default function UsersPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

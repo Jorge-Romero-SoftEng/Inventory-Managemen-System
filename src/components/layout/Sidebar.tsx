@@ -39,19 +39,19 @@ export function Sidebar() {
   ].filter((item) => gate(item.policy));
 
   return (
-    <aside className="w-56 border-r border-border bg-card flex flex-col">
+    <aside className="group w-14 hover:w-56 [@media(hover:none)]:w-56 transition-all duration-200 border-r border-border bg-card flex flex-col overflow-hidden whitespace-nowrap">
       <div className="p-4 border-b border-border">
-        <Link href="/" className="flex items-center gap-2">
-          <LayoutDashboard className="h-6 w-6 text-primary" />
-          <span className="font-bold text-lg">{t.layout.brand}</span>
+        <Link href="/" className="flex items-center justify-center group-hover:justify-start [@media(hover:none)]:justify-start gap-2" aria-label={t.layout.brand} title={t.layout.brand}>
+          <LayoutDashboard className="h-6 w-6 text-primary shrink-0" />
+          <span className="font-bold text-lg hidden group-hover:inline [@media(hover:none)]:inline">{t.layout.brand}</span>
         </Link>
       </div>
       <nav className="flex-1 p-2">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-3 py-2 mb-1">
-                <Skeleton className="h-4 w-4 rounded" />
-                <Skeleton className="h-4 w-24" />
+              <div key={i} className="flex items-center justify-center group-hover:justify-start [@media(hover:none)]:justify-start gap-3 px-3 py-2 mb-1">
+                <Skeleton className="h-4 w-4 rounded shrink-0" />
+                <Skeleton className="h-4 w-24 hidden group-hover:block [@media(hover:none)]:block" />
               </div>
             ))
           : navItems.map((item) => {
@@ -60,15 +60,17 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={item.label}
+                  aria-label={item.label}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors mb-1",
+                    "flex items-center justify-center group-hover:justify-start [@media(hover:none)]:justify-start gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors mb-1",
                     isActive
                       ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span className="hidden group-hover:inline [@media(hover:none)]:inline">{item.label}</span>
                 </Link>
               );
             })}
@@ -79,11 +81,12 @@ export function Sidebar() {
             await fetch("/api/auth/logout", { method: "POST" });
             router.push("/login");
           }}
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground w-full"
+          className="flex items-center justify-center group-hover:justify-start [@media(hover:none)]:justify-start gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/50 hover:text-foreground w-full"
           aria-label={t.nav.logout}
+          title={t.nav.logout}
         >
-          <LogOut className="h-4 w-4" />
-          {t.nav.logout}
+          <LogOut className="h-4 w-4 shrink-0" />
+          <span className="hidden group-hover:inline [@media(hover:none)]:inline">{t.nav.logout}</span>
         </button>
       </div>
     </aside>

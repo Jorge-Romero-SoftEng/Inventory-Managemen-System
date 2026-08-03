@@ -46,11 +46,13 @@ src/
 │   │   ├── payments/       # create + list by sale
 │   │   └── reports/        # daily-sales, low-stock, balances
 │   ├── login/page.tsx      # Login form
-│   ├── pos/page.tsx        # Main POS terminal
-│   ├── products/page.tsx   # Product CRUD
-│   ├── customers/page.tsx  # Customer CRUD
-│   ├── sales/page.tsx      # Sales history + invoice detail
-│   └── reports/page.tsx    # Tabbed reports
+│   ├── (app)/              # Route group: authenticated app pages (shared shell)
+│   │   ├── layout.tsx      # Shared shell: <Sidebar /> + flex column wrapping children
+│   │   ├── pos/page.tsx    # Main POS terminal
+│   │   ├── products/page.tsx   # Product CRUD
+│   │   ├── customers/page.tsx  # Customer CRUD
+│   │   ├── sales/page.tsx      # Sales history + invoice detail
+│   │   └── reports/page.tsx    # Tabbed reports
 ├── components/
 │   ├── layout/             # Sidebar, TopBar
 │   ├── pos/                # ProductSearch, SaleGrid, SaleSummary, PaymentDialog
@@ -78,7 +80,9 @@ src/
 
 ### Components
 - All pages and interactive components use `"use client"` directive
-- Pages follow layout: `<div className="flex h-screen overflow-hidden"><Sidebar /><div className="flex flex-col flex-1"><TopBar />...content...</div></div>`
+- App pages live under the `(app)` route group; `(app)/layout.tsx` renders the shared shell `<div className="flex h-screen overflow-hidden"><Sidebar /><div className="flex flex-col flex-1 overflow-hidden">{children}</div></div>`, so `Sidebar` never remounts on navigation
+- Pages render `<TopBar />` (per-page, so POS can pass `saleNumber`) followed by a `<div className="flex-1 overflow-auto p-4">` content wrapper; POS uses a `flex flex-col flex-1` wrapper instead
+- Sidebar is collapsed by default (`w-14`) and expands on hover (`group-hover:w-56`); on touch devices (`@media (hover: none)`) it stays fully open
 - Create/edit via **dialog pattern** (no separate pages)
 - Debounced search: 200-300ms `setTimeout` in `useEffect` cleanup
 - Fetch-based API calls from client components (no server actions, no React Query)
