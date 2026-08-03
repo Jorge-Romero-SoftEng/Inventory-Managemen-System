@@ -52,9 +52,6 @@ export function PaymentDialog({
 
   const paymentMethods = [
     { id: "cash", label: t.payment.cash, color: "bg-green-600 hover:bg-green-500" },
-    { id: "transfer", label: t.payment.transfer, color: "bg-blue-600 hover:bg-blue-500" },
-    { id: "qr", label: t.payment.qrCode, color: "bg-teal-600 hover:bg-teal-500" },
-    { id: "credit", label: t.payment.creditAccount, color: "bg-orange-600 hover:bg-orange-500" },
   ];
 
   const resetQr = useCallback(() => {
