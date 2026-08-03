@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
 import { getMercadoPagoOrder } from "@/lib/mercadopago";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePolicy(POLICY.salesCancel);
@@ -16,8 +19,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       include: { items: true },
     });
 
-    if (!sale) return NextResponse.json({ error: "Sale not found" }, { status: 404 });
-    if (sale.status === "cancelled") return NextResponse.json({ error: "Sale already cancelled" }, { status: 400 });
+    if (!sale) return NextResponse.json({ error: t.api.saleNotFound }, { status: 404 });
+    if (sale.status === "cancelled") return NextResponse.json({ error: t.api.saleAlreadyCancelled }, { status: 400 });
 
     // If it's a pending QR sale with an MP order, cancel the MP order first
     if (sale.status === "pending" && sale.mpOrderId) {
@@ -70,6 +73,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Cancel sale error:", error);
-    return NextResponse.json({ error: "Failed to cancel sale" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCancelSale }, { status: 500 });
   }
 }

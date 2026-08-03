@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getTranslations } from "@/i18n/translations";
 
 export const POLICY = {
   productsView: "products.view",
@@ -113,19 +114,20 @@ export async function getSessionUser(): Promise<SessionUser | null> {
  * request is not authorized, or null to continue.
  */
 export async function requirePolicy(policyKey: string): Promise<NextResponse | null> {
+  const t = getTranslations();
   const session = await getSession();
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: t.api.unauthorized }, { status: 401 });
   }
 
   const user = await loadUser(session.userId);
   if (!user || !user.active || user.deletedAt) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: t.api.unauthorized }, { status: 401 });
   }
 
   const keys = new Set(user.role?.rolePolicies.map((rp) => rp.policy.key) ?? []);
   if (!keys.has(policyKey)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: t.api.forbidden }, { status: 403 });
   }
 
   return null;

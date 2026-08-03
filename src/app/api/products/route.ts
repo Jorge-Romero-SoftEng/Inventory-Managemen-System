@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(request: NextRequest) {
   const denied = await requirePolicy(POLICY.productsView);
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(products);
   } catch (error) {
     console.error("Get products error:", error);
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchProducts }, { status: 500 });
   }
 }
 
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
     const { barcode, name, categoryId, cost, active } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameRequired }, { status: 400 });
     }
 
     const product = await prisma.product.create({
@@ -71,9 +74,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "A product with that barcode already exists" }, { status: 409 });
+      return NextResponse.json({ error: t.api.barcodeExists }, { status: 409 });
     }
     console.error("Create product error:", error);
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateProduct }, { status: 500 });
   }
 }

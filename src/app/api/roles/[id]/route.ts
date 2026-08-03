@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePolicy(POLICY.rolesView);
@@ -18,12 +21,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       },
     });
     if (!role || role.deletedAt) {
-      return NextResponse.json({ error: "Role not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.roleNotFound }, { status: 404 });
     }
     return NextResponse.json(role);
   } catch (error) {
     console.error("Get role error:", error);
-    return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchRole }, { status: 500 });
   }
 }
 
@@ -39,7 +42,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const role = await prisma.$transaction(async (tx) => {
       const existing = await tx.role.findUnique({ where: { id: roleId } });
       if (!existing || existing.deletedAt) {
-        throw new Error("Role not found");
+        throw new Error("ROLE_NOT_FOUND");
       }
 
       const updated = await tx.role.update({
@@ -70,10 +73,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(role);
   } catch (error) {
+    const notFound = error instanceof Error && error.message === "ROLE_NOT_FOUND";
     console.error("Update role error:", error);
     return NextResponse.json(
-      { error: error instanceof Error && error.message === "Role not found" ? "Role not found" : "Failed to update role" },
-      { status: error instanceof Error && error.message === "Role not found" ? 404 : 500 }
+      { error: notFound ? t.api.roleNotFound : t.api.failedUpdateRole },
+      { status: notFound ? 404 : 500 }
     );
   }
 }
@@ -88,10 +92,10 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     const role = await prisma.role.findUnique({ where: { id: roleId } });
     if (!role || role.deletedAt) {
-      return NextResponse.json({ error: "Role not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.roleNotFound }, { status: 404 });
     }
     if (role.isSystem) {
-      return NextResponse.json({ error: "System roles cannot be deleted" }, { status: 400 });
+      return NextResponse.json({ error: t.api.cannotDeleteSystemRole }, { status: 400 });
     }
 
     await prisma.$transaction(async (tx) => {
@@ -108,6 +112,6 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete role error:", error);
-    return NextResponse.json({ error: "Failed to delete role" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedDeleteRole }, { status: 500 });
   }
 }

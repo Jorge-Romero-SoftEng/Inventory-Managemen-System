@@ -22,6 +22,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [formError, setFormError] = useState("");
   const [form, setForm] = useState({
     barcode: "",
     name: "",
@@ -44,6 +45,7 @@ export default function ProductsPage() {
   function openNew() {
     setEditingProduct(null);
     setForm({ barcode: "", name: "", categoryId: null, cost: "0", active: true });
+    setFormError("");
     setShowForm(true);
   }
 
@@ -56,6 +58,7 @@ export default function ProductsPage() {
       cost: p.cost.toString(),
       active: p.active,
     });
+    setFormError("");
     setShowForm(true);
   }
 
@@ -63,14 +66,25 @@ export default function ProductsPage() {
     const url = editingProduct ? `/api/products/${editingProduct.id}` : "/api/products";
     const method = editingProduct ? "PUT" : "POST";
 
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    setFormError("");
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    setShowForm(false);
-    loadProducts();
+      const data = await res.json();
+      if (!res.ok) {
+        setFormError(data.error || "");
+        return;
+      }
+
+      setShowForm(false);
+      loadProducts();
+    } catch {
+      setFormError(t.login.connectionError);
+    }
   }
 
   async function handleDelete(id: number) {
@@ -155,6 +169,9 @@ export default function ProductsPage() {
             <DialogTitle>{editingProduct ? t.products.editProduct : t.products.newProduct}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {formError && (
+              <div className="text-sm text-red-500 bg-red-500/10 p-2 rounded">{formError}</div>
+            )}
             <div>
               <label className="text-sm text-muted-foreground">{t.products.barcode}</label>
               <Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function POST(request: NextRequest) {
   const denied = await requirePolicy(POLICY.salesCreate);
@@ -10,7 +13,7 @@ export async function POST(request: NextRequest) {
     const { saleId, method, amount, reference } = await request.json();
 
     if (!saleId || !method || !amount) {
-      return NextResponse.json({ error: "saleId, method, and amount are required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.paymentRequired }, { status: 400 });
     }
 
     const payment = await prisma.$transaction(async (tx) => {
@@ -37,6 +40,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
     console.error("Create payment error:", error);
-    return NextResponse.json({ error: "Failed to create payment" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreatePayment }, { status: 500 });
   }
 }

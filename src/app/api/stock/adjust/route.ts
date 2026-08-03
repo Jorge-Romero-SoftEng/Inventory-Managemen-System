@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function POST(request: NextRequest) {
   const denied = await requirePolicy(POLICY.stockAdjust);
@@ -10,7 +13,7 @@ export async function POST(request: NextRequest) {
     const { productId, warehouse, quantity, reason } = await request.json();
 
     if (!productId || quantity === undefined) {
-      return NextResponse.json({ error: "ProductId and quantity are required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.stockAdjustRequired }, { status: 400 });
     }
 
     const wh = warehouse || "main";
@@ -45,6 +48,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Adjust stock error:", error);
-    return NextResponse.json({ error: "Failed to adjust stock" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedAdjustStock }, { status: 500 });
   }
 }

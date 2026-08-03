@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePolicy(POLICY.productsView);
@@ -15,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json(prices);
   } catch (error) {
     console.error("Get prices error:", error);
-    return NextResponse.json({ error: "Failed to fetch prices" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchPrices }, { status: 500 });
   }
 }
 
@@ -53,6 +56,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Update prices error:", error);
-    return NextResponse.json({ error: "Failed to update prices" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedUpdatePrices }, { status: 500 });
   }
 }

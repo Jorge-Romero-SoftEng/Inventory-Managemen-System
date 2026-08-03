@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
 import {
   calculateSubtotal,
   calculateDiscountTotal,
   calculateTotal,
 } from "@/lib/pricing";
+
+const t = getTranslations();
 
 export async function GET(request: NextRequest) {
   const denied = await requirePolicy(POLICY.salesView);
@@ -39,7 +42,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sales, total });
   } catch (error) {
     console.error("Get sales error:", error);
-    return NextResponse.json({ error: "Failed to fetch sales" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchSales }, { status: 500 });
   }
 }
 
@@ -50,18 +53,18 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: t.api.unauthorized }, { status: 401 });
     }
 
     const body = await request.json();
     const { customerId, items, paymentMethod, discount, tax, delivery } = body;
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.atLeastOneItem }, { status: 400 });
     }
 
     if (!paymentMethod) {
-      return NextResponse.json({ error: "Payment method is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.paymentMethodRequired }, { status: 400 });
     }
 
     const saleNumber = `INV-${Date.now()}`;
@@ -143,6 +146,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(sale, { status: 201 });
   } catch (error) {
     console.error("Create sale error:", error);
-    return NextResponse.json({ error: "Failed to create sale" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateSale }, { status: 500 });
   }
 }

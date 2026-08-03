@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(request: NextRequest) {
   const denied = await requirePolicy(POLICY.categoriesView);
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(categories);
   } catch (error) {
     console.error("Get categories error:", error);
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchCategories }, { status: 500 });
   }
 }
 
@@ -41,7 +44,7 @@ export async function POST(request: NextRequest) {
     const { name } = body;
 
     if (!name || !name.trim()) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameRequired }, { status: 400 });
     }
 
     const category = await prisma.category.create({ data: { name: name.trim() } });
@@ -49,9 +52,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "A category with that name already exists" }, { status: 409 });
+      return NextResponse.json({ error: t.api.categoryExists }, { status: 409 });
     }
     console.error("Create category error:", error);
-    return NextResponse.json({ error: "Failed to create category" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateCategory }, { status: 500 });
   }
 }
