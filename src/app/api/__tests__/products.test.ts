@@ -107,6 +107,116 @@ describe("products API", () => {
       );
     });
 
+    it("clamps page 0 to page 1", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      const res = await listProducts(
+        apiRequest("/api/products?page=0&pageSize=10")
+      );
+
+      expect((await res.json()).page).toBe(1);
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("clamps a negative page to page 1", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      const res = await listProducts(
+        apiRequest("/api/products?page=-2&pageSize=10")
+      );
+
+      expect((await res.json()).page).toBe(1);
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("falls back to page 1 when page is not a number", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      const res = await listProducts(
+        apiRequest("/api/products?page=abc&pageSize=10")
+      );
+
+      expect((await res.json()).page).toBe(1);
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("clamps pageSize 0 to 1", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      const res = await listProducts(
+        apiRequest("/api/products?page=3&pageSize=0")
+      );
+
+      expect((await res.json()).pageSize).toBe(1);
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 2, take: 1 })
+      );
+    });
+
+    it("clamps pageSize to 1 when it is not a number", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      const res = await listProducts(
+        apiRequest("/api/products?page=3&pageSize=abc")
+      );
+
+      expect((await res.json()).pageSize).toBe(1);
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 2, take: 1 })
+      );
+    });
+
+    it("combines search, categoryId and pagination", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      await listProducts(
+        apiRequest("/api/products?search=harina&categoryId=3&page=2&pageSize=10")
+      );
+
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            categoryId: 3,
+            OR: [
+              { name: { contains: "harina", mode: "insensitive" } },
+              { barcode: { contains: "harina", mode: "insensitive" } },
+            ],
+          }),
+          skip: 10,
+          take: 10,
+        })
+      );
+    });
+
+    it("keeps the active filter when paginating", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      await listProducts(
+        apiRequest("/api/products?active=true&page=2&pageSize=10")
+      );
+
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ active: true }),
+          skip: 10,
+          take: 10,
+        })
+      );
+    });
+
     it("returns 500 when the query fails", async () => {
       prismaMock.product.findMany.mockRejectedValue(new Error("db down"));
 
