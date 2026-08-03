@@ -18,6 +18,7 @@ const { prismaMock } = vi.hoisted(() => {
       findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      count: vi.fn(),
     },
     stock: {
       create: vi.fn(),
@@ -41,14 +42,69 @@ describe("products API", () => {
   });
 
   describe("GET /api/products", () => {
-    it("returns the list of products", async () => {
+    it("returns the list of products with pagination metadata", async () => {
       const products = [{ id: 1, name: "Harina" }];
       prismaMock.product.findMany.mockResolvedValue(products);
+      prismaMock.product.count.mockResolvedValue(1);
 
       const res = await listProducts(apiRequest("/api/products"));
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual(products);
+      expect(await res.json()).toEqual({
+        products,
+        total: 1,
+        page: 1,
+        pageSize: null,
+      });
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: undefined, take: undefined })
+      );
+    });
+
+    it("applies skip/take when page and pageSize are provided", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(25);
+
+      const res = await listProducts(
+        apiRequest("/api/products?page=2&pageSize=10")
+      );
+
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({
+        products: [],
+        total: 25,
+        page: 2,
+        pageSize: 10,
+      });
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 10, take: 10 })
+      );
+    });
+
+    it("returns all products when pageSize is all", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(25);
+
+      const res = await listProducts(
+        apiRequest("/api/products?pageSize=all")
+      );
+
+      expect(res.status).toBe(200);
+      expect((await res.json()).pageSize).toBeNull();
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: undefined, take: undefined })
+      );
+    });
+
+    it("filters by categoryId", async () => {
+      prismaMock.product.findMany.mockResolvedValue([]);
+      prismaMock.product.count.mockResolvedValue(0);
+
+      await listProducts(apiRequest("/api/products?categoryId=3"));
+
+      expect(prismaMock.product.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: expect.objectContaining({ categoryId: 3 }) })
+      );
     });
 
     it("returns 500 when the query fails", async () => {

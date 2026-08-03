@@ -58,8 +58,9 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
       try {
         const res = await fetch(`/api/products?search=${encodeURIComponent(q)}&active=true`);
         const data = await res.json();
-        setResults(data);
-        setShowDropdown(data.length > 0);
+        const products: Product[] = data.products ?? [];
+        setResults(products);
+        setShowDropdown(products.length > 0);
         setSelectedIndex(0);
       } catch (error) {
         console.error("Search error:", error);
@@ -85,8 +86,9 @@ export const ProductSearch = forwardRef<HTMLInputElement, ProductSearchProps>(
         try {
           const res = await fetch(`/api/products?barcode=${encodeURIComponent(barcode)}&active=true`);
           const data = await res.json();
-          if (data.length > 0) {
-            onSelectProduct(data[0]);
+          const products: Product[] = data.products ?? [];
+          if (products.length > 0) {
+            onSelectProduct(products[0]);
             setScanError(false);
           } else {
             showScanError();

@@ -15,6 +15,14 @@ export async function GET(request: NextRequest) {
     const barcode = searchParams.get("barcode");
     const categoryId = searchParams.get("categoryId");
     const active = searchParams.get("active");
+    const pageParam = searchParams.get("page");
+    const pageSizeParam = searchParams.get("pageSize");
+
+    const page = Math.max(1, parseInt(pageParam || "1") || 1);
+    const pageSize =
+      pageSizeParam && pageSizeParam !== "all"
+        ? Math.max(1, parseInt(pageSizeParam) || 1)
+        : null;
 
     const where: Record<string, unknown> = { deletedAt: null };
     if (barcode) {
@@ -28,17 +36,22 @@ export async function GET(request: NextRequest) {
     if (categoryId) where.categoryId = parseInt(categoryId);
     if (active !== null) where.active = active === "true";
 
-    const products = await prisma.product.findMany({
-      where,
-      include: {
-        category: true,
-        prices: { include: { priceList: true } },
-        stock: true,
-      },
-      orderBy: { name: "asc" },
-    });
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          category: true,
+          prices: { include: { priceList: true } },
+          stock: true,
+        },
+        orderBy: { name: "asc" },
+        skip: pageSize ? (page - 1) * pageSize : undefined,
+        take: pageSize || undefined,
+      }),
+      prisma.product.count({ where }),
+    ]);
 
-    return NextResponse.json(products);
+    return NextResponse.json({ products, total, page, pageSize });
   } catch (error) {
     console.error("Get products error:", error);
     return NextResponse.json({ error: t.api.failedFetchProducts }, { status: 500 });
