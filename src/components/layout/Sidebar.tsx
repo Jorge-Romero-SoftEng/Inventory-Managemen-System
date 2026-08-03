@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/i18n";
 import { useMe } from "@/hooks/useMe";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ShoppingCart,
   Package,
@@ -22,9 +23,9 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations();
-  const me = useMe();
+  const { me, loading } = useMe();
   const policies = new Set(me?.policies ?? []);
-  const gate = (key: string) => !me || policies.has(key);
+  const gate = (key: string) => policies.has(key);
 
   const navItems = [
     { href: "/pos", label: t.nav.pos, icon: ShoppingCart, policy: "sales.create" },
@@ -46,24 +47,31 @@ export function Sidebar() {
         </Link>
       </div>
       <nav className="flex-1 p-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors mb-1",
-                isActive
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+        {loading
+          ? Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-3 py-2 mb-1">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            ))
+          : navItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors mb-1",
+                    isActive
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
       </nav>
       <div className="p-2 border-t border-border">
         <button

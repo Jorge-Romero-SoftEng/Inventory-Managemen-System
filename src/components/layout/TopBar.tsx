@@ -12,7 +12,7 @@ interface TopBarProps {
 
 export function TopBar({ saleNumber, user = "Admin", isOnline = true }: TopBarProps) {
   const t = useTranslations();
-  const me = useMe();
+  const { me } = useMe();
   const label = me ? (me.role ? `${me.name} · ${me.role}` : me.name) : user;
 
   return (

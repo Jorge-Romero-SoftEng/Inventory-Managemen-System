@@ -36,7 +36,7 @@ interface RoleDetail extends RoleRow {
 
 export default function RolesPage() {
   const t = useTranslations();
-  const me = useMe();
+  const { me } = useMe();
   const canManage = me?.policies.includes("roles.manage") ?? false;
   const lang = getLocale();
 

@@ -30,7 +30,7 @@ interface UserRow {
 
 export default function UsersPage() {
   const t = useTranslations();
-  const me = useMe();
+  const { me } = useMe();
   const canManage = me?.policies.includes("users.manage") ?? false;
 
   const [users, setUsers] = useState<UserRow[]>([]);
