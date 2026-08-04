@@ -1,14 +1,15 @@
-name: ${PROJECT_NAME}-security
+name: PentestingPOS-security
 
 services:
   migration:
+    pull_policy: never
     build:
       context: .
       target: migrator
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?schema=public
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_USERNAME: "admin@wholesale.com"
+      ADMIN_PASSWORD: "1234"
     depends_on:
       db:
         condition: service_healthy
@@ -41,7 +42,7 @@ services:
       target: runner
     image: ${APP_IMAGE_NAME}-security:${APP_IMAGE_TAG}
     pull_policy: never
-    container_name: ${PROJECT_NAME}-app-security
+    container_name: PentestingPOS-app-security
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?schema=public
@@ -62,7 +63,9 @@ services:
   zap:
     image: ghcr.io/zaproxy/zaproxy:stable
     platform: linux/amd64
-    container_name: ${PROJECT_NAME}-zap
+    container_name: PentestingPOS-zap
+    #tty: true                  
+    #stdin_open: true
 
     depends_on:
       app:
@@ -70,9 +73,12 @@ services:
 
     volumes:
       - ./security/zap-plan-realistic.yaml:/zap/zap-plan-realistic.yaml:ro
-      - ./security/reports:/zap/reports
-      - ./security/zap-work:/zap/work
+      - ./security/reports:/zap/reports:rw
+      - ./security/zap-work:/zap/work:rw
+      #- ./security/reports:/zap/wrk:rw
 
+    # entrypoint: [""]
+    #command: zap-baseline.py -t http://app -d -z "-config spider.maxDuration=0" -r spider-report.html 
     command:
       - zap.sh
       - -cmd
@@ -86,7 +92,7 @@ services:
 
 networks:
   security_net:
-    name: ${PROJECT_NAME}-security-net
+    name: PentestingPOS-security-net
     driver: bridge
     internal: true
 

@@ -1,28 +1,88 @@
 env:
   contexts:
-    - name: POS
+    # - name: POS
+    #   urls:
+    #     - http://app
+    #   includePaths:
+    #     - http://app.*
+
+    - name: "Authenticated-App"
       urls:
-        - http://app
+        - "http://app"
       includePaths:
-        - http://app.*
+        - "http://app.*"
+      excludePaths:
+        - ".*logout.*"
+        - ".*signout.*"
+        - ".*login.*"
+      authentication:
+        method: "browser"
+        parameters:
+          loginPageUrl: "http://app/login"
+          loginPageWait: 5
+          browserId: "firefox-headless"
+        verification:
+          method: "response"
+          loggedInRegex: '\Q<pos-page-marker>\E'
+          loggedOutRegex: '\Q/login\E'
+          pollUrl: "http://app/pos"
+          pollFrequency: 60
+          pollUnits: "requests"
+      sessionManagement:
+        method: "cookie"
+      users:
+        - name: "scan_admin"
+          credentials:
+            username: "admin@wholesale.com"
+            password: "1234"
 
 jobs:
-  # 2. Discover React routes
+  - type: spider
+    parameters:
+      context: "Authenticated-App"
+      user: "scan_admin"
+      url: "http://app/pos"
+      maxDuration: 10
+
   - type: spiderAjax
     parameters:
-      context: POS
+      context: "Authenticated-App"
+      user: "scan_admin"
+      url: "http://app/pos"
+      maxDuration: 10
+      browserId: "firefox-headless"
 
-  # 3. Passive security analysis
   - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
 
-  # 4. Active attack simulation
   - type: activeScan
     parameters:
-      context: POS
+      context: "Authenticated-App"
+      user: "scan_admin"
+      url: "http://app/pos"
 
-  # 5. Generate reports
   - type: report
     parameters:
-      template: traditional-html
-      reportDir: /zap/reports
-      reportFile: report.html
+      template: "modern"
+      reportDir: "/zap/reports"
+      reportFile: "zap-authenticated-report"
+  # # 2. Discover React routes
+  # - type: spiderAjax
+  #   parameters:
+  #     context: POS
+
+  # # 3. Passive security analysis
+  # - type: passiveScan-wait
+
+  # # 4. Active attack simulation
+  # - type: activeScan
+  #   parameters:
+  #     context: POS
+
+  # # 5. Generate reports
+  # - type: report
+  #   parameters:
+  #     template: traditional-html
+  #     reportDir: /zap/reports
+  #     reportFile: report.html
