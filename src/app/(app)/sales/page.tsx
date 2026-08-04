@@ -9,10 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Eye, XCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useTranslations } from "@/i18n";
+import { useMe } from "@/hooks/useMe";
 import type { Sale } from "@/types";
 
 export default function SalesPage() {
   const t = useTranslations();
+  const { me } = useMe();
+  const canCancel = me?.policies.includes("sales.cancel") ?? false;
   const [sales, setSales] = useState<Sale[]>([]);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
@@ -146,7 +149,7 @@ export default function SalesPage() {
               <div className="flex justify-between"><span>{t.common.tax}</span><span className="font-mono">{formatCurrency(Number(selectedSale.tax))}</span></div>
               <div className="flex justify-between font-bold text-lg"><span>{t.common.total}</span><span className="font-mono text-green-400">{formatCurrency(Number(selectedSale.total))}</span></div>
             </div>
-            {(selectedSale.status === "completed" || selectedSale.status === "pending") && (
+            {canCancel && (selectedSale.status === "completed" || selectedSale.status === "pending") && (
               <Button variant="destructive" className="w-full mt-4" onClick={() => cancelSale(selectedSale.id)} aria-label={selectedSale.status === "pending" ? t.sales.cancelPendingQR : t.sales.cancelSale}>
                 {selectedSale.status === "pending" ? t.sales.cancelPendingQR : t.sales.cancelSale}
               </Button>

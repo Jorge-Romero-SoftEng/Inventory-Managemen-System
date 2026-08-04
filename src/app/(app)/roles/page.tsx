@@ -160,7 +160,7 @@ export default function RolesPage() {
                     <TableHead>{t.roles.description}</TableHead>
                     <TableHead className="text-right">{t.roles.policies}</TableHead>
                     <TableHead className="text-right">{t.roles.users}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {canManage && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -183,13 +183,13 @@ export default function RolesPage() {
                           <Badge variant="secondary">{r._count.rolePolicies}</Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs">{r._count.users}</TableCell>
+                        {canManage && (
                         <TableCell>
                           <div className="flex gap-1">
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              disabled={!canManage}
                               onClick={() => openEdit(r)}
                               aria-label={`Edit ${r.name}`}
                             >
@@ -199,7 +199,7 @@ export default function RolesPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-red-400"
-                              disabled={!canManage || r.isSystem}
+                              disabled={r.isSystem}
                               onClick={() => handleDelete(r.id)}
                               aria-label={`Delete ${r.name}`}
                             >
@@ -207,6 +207,7 @@ export default function RolesPage() {
                             </Button>
                           </div>
                         </TableCell>
+                        )}
                       </TableRow>
                     ))}
                 </TableBody>

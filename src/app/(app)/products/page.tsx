@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { CategoryCombobox } from "@/components/products/CategoryCombobox";
 import { Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "@/i18n";
+import { useMe } from "@/hooks/useMe";
 import { formatNumber } from "@/lib/utils";
 import type { Product, Category } from "@/types";
 
@@ -20,6 +21,10 @@ type PageSize = number | "all";
 
 export default function ProductsPage() {
   const t = useTranslations();
+  const { me } = useMe();
+  const canCreate = me?.policies.includes("products.create") ?? false;
+  const canUpdate = me?.policies.includes("products.update") ?? false;
+  const canDelete = me?.policies.includes("products.delete") ?? false;
   const [products, setProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -132,10 +137,12 @@ export default function ProductsPage() {
       <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.products.title}</h1>
-            <Button onClick={openNew} aria-label={t.products.newProduct}>
-              <Plus className="h-4 w-4 mr-1" />
-              {t.products.newProduct}
-            </Button>
+            {canCreate && (
+              <Button onClick={openNew} aria-label={t.products.newProduct}>
+                <Plus className="h-4 w-4 mr-1" />
+                {t.products.newProduct}
+              </Button>
+            )}
           </div>
 
           <div className="flex gap-2 mb-4">
@@ -219,13 +226,13 @@ export default function ProductsPage() {
                     <TableHead>{t.products.category}</TableHead>
                     <TableHead className="text-right">{t.products.cost}</TableHead>
                     <TableHead>{t.common.status}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {(canUpdate || canDelete) && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {products.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={canUpdate || canDelete ? 6 : 5} className="text-center text-muted-foreground py-8">
                         {t.products.empty}
                       </TableCell>
                     </TableRow>
@@ -244,14 +251,20 @@ export default function ProductsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
+                          {(canUpdate || canDelete) && (
                           <div className="flex gap-1">
+                            {canUpdate && (
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`}>
                               <Pencil className="h-3 w-3" />
                             </Button>
+                            )}
+                            {canDelete && (
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(p.id)} aria-label={`Delete ${p.name}`}>
                               <Trash2 className="h-3 w-3" />
                             </Button>
+                            )}
                           </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))

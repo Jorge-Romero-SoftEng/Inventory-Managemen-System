@@ -10,10 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useTranslations } from "@/i18n";
+import { useMe } from "@/hooks/useMe";
 import type { Customer } from "@/types";
 
 export default function CustomersPage() {
   const t = useTranslations();
+  const { me } = useMe();
+  const canCreate = me?.policies.includes("customers.create") ?? false;
+  const canUpdate = me?.policies.includes("customers.update") ?? false;
+  const canDelete = me?.policies.includes("customers.delete") ?? false;
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -81,10 +86,12 @@ export default function CustomersPage() {
       <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.customers.title}</h1>
-            <Button onClick={openNew} aria-label={t.customers.newCustomer}>
-              <Plus className="h-4 w-4 mr-1" />
-              {t.customers.newCustomer}
-            </Button>
+            {canCreate && (
+              <Button onClick={openNew} aria-label={t.customers.newCustomer}>
+                <Plus className="h-4 w-4 mr-1" />
+                {t.customers.newCustomer}
+              </Button>
+            )}
           </div>
 
           <div className="relative mb-4">
@@ -108,7 +115,7 @@ export default function CustomersPage() {
                     <TableHead>{t.customers.address}</TableHead>
                     <TableHead className="text-right">{t.customers.creditLimit}</TableHead>
                     <TableHead className="text-right">{t.customers.balance}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {(canUpdate || canDelete) && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -121,14 +128,20 @@ export default function CustomersPage() {
                       <TableCell className="text-right font-mono">{formatCurrency(Number(c.creditLimit))}</TableCell>
                       <TableCell className="text-right font-mono text-orange-400">{formatCurrency(Number(c.balance))}</TableCell>
                       <TableCell>
+                        {(canUpdate || canDelete) && (
                         <div className="flex gap-1">
+                          {canUpdate && (
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)} aria-label={`Edit ${c.name}`}>
                             <Pencil className="h-3 w-3" />
                           </Button>
+                          )}
+                          {canDelete && (
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(c.id)} aria-label={`Delete ${c.name}`}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
+                          )}
                         </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

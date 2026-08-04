@@ -168,7 +168,7 @@ export default function UsersPage() {
                     <TableHead>{t.common.email}</TableHead>
                     <TableHead>{t.users.role}</TableHead>
                     <TableHead>{t.users.status}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {canManage && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -179,24 +179,25 @@ export default function UsersPage() {
                       <TableCell>{u.role?.name ?? "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Switch
-                            checked={u.active}
-                            disabled={!canManage}
-                            onCheckedChange={() => toggleActive(u)}
-                            aria-label={u.active ? t.users.disable : t.users.enable}
-                          />
+                          {canManage && (
+                            <Switch
+                              checked={u.active}
+                              onCheckedChange={() => toggleActive(u)}
+                              aria-label={u.active ? t.users.disable : t.users.enable}
+                            />
+                          )}
                           <span className="text-xs">
                             {u.active ? t.users.active : t.users.inactive}
                           </span>
                         </div>
                       </TableCell>
+                      {canManage && (
                       <TableCell>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            disabled={!canManage}
                             onClick={() => openEdit(u)}
                             aria-label={`Edit ${u.name}`}
                           >
@@ -206,7 +207,6 @@ export default function UsersPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-red-400"
-                            disabled={!canManage}
                             onClick={() => handleDelete(u.id)}
                             aria-label={`Delete ${u.name}`}
                           >
@@ -214,6 +214,7 @@ export default function UsersPage() {
                           </Button>
                         </div>
                       </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
