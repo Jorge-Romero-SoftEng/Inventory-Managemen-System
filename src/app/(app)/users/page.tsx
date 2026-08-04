@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +29,7 @@ interface UserRow {
 
 export default function UsersPage() {
   const t = useTranslations();
-  const me = useMe();
+  const { me } = useMe();
   const canManage = me?.policies.includes("users.manage") ?? false;
 
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -137,11 +136,9 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.users.title}</h1>
             {canManage && (
@@ -171,7 +168,7 @@ export default function UsersPage() {
                     <TableHead>{t.common.email}</TableHead>
                     <TableHead>{t.users.role}</TableHead>
                     <TableHead>{t.users.status}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {canManage && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -182,24 +179,25 @@ export default function UsersPage() {
                       <TableCell>{u.role?.name ?? "-"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Switch
-                            checked={u.active}
-                            disabled={!canManage}
-                            onCheckedChange={() => toggleActive(u)}
-                            aria-label={u.active ? t.users.disable : t.users.enable}
-                          />
+                          {canManage && (
+                            <Switch
+                              checked={u.active}
+                              onCheckedChange={() => toggleActive(u)}
+                              aria-label={u.active ? t.users.disable : t.users.enable}
+                            />
+                          )}
                           <span className="text-xs">
                             {u.active ? t.users.active : t.users.inactive}
                           </span>
                         </div>
                       </TableCell>
+                      {canManage && (
                       <TableCell>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            disabled={!canManage}
                             onClick={() => openEdit(u)}
                             aria-label={`Edit ${u.name}`}
                           >
@@ -209,7 +207,6 @@ export default function UsersPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-red-400"
-                            disabled={!canManage}
                             onClick={() => handleDelete(u.id)}
                             aria-label={`Delete ${u.name}`}
                           >
@@ -217,6 +214,7 @@ export default function UsersPage() {
                           </Button>
                         </div>
                       </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -224,7 +222,6 @@ export default function UsersPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
@@ -273,6 +270,6 @@ export default function UsersPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

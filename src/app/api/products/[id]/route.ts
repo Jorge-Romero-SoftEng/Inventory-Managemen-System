@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePolicy(POLICY.productsView);
@@ -18,13 +21,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     });
 
     if (!product || product.deletedAt) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.productNotFound }, { status: 404 });
     }
 
     return NextResponse.json(product);
   } catch (error) {
     console.error("Get product error:", error);
-    return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchProduct }, { status: 500 });
   }
 }
 
@@ -51,8 +54,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(product);
   } catch (error) {
+    if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
+      return NextResponse.json({ error: t.api.barcodeExists }, { status: 409 });
+    }
     console.error("Update product error:", error);
-    return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedUpdateProduct }, { status: 500 });
   }
 }
 
@@ -69,9 +75,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2025") {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.productNotFound }, { status: 404 });
     }
     console.error("Delete product error:", error);
-    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedDeleteProduct }, { status: 500 });
   }
 }

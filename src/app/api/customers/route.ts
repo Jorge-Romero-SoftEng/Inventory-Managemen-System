@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(request: NextRequest) {
   const denied = await requirePolicy(POLICY.customersView);
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(customers);
   } catch (error) {
     console.error("Get customers error:", error);
-    return NextResponse.json({ error: "Failed to fetch customers" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchCustomers }, { status: 500 });
   }
 }
 
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
     const { name, taxId, address, phone, creditLimit } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameRequired }, { status: 400 });
     }
 
     const customer = await prisma.customer.create({
@@ -58,6 +61,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(customer, { status: 201 });
   } catch (error) {
     console.error("Create customer error:", error);
-    return NextResponse.json({ error: "Failed to create customer" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateCustomer }, { status: 500 });
   }
 }

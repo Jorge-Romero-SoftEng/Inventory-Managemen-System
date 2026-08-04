@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(request: NextRequest) {
   const denied = await requirePolicy(POLICY.productsView);
@@ -12,6 +15,14 @@ export async function GET(request: NextRequest) {
     const barcode = searchParams.get("barcode");
     const categoryId = searchParams.get("categoryId");
     const active = searchParams.get("active");
+    const pageParam = searchParams.get("page");
+    const pageSizeParam = searchParams.get("pageSize");
+
+    const page = Math.max(1, parseInt(pageParam || "1") || 1);
+    const pageSize =
+      pageSizeParam && pageSizeParam !== "all"
+        ? Math.max(1, parseInt(pageSizeParam) || 1)
+        : null;
 
     const where: Record<string, unknown> = { deletedAt: null };
     if (barcode) {
@@ -25,20 +36,25 @@ export async function GET(request: NextRequest) {
     if (categoryId) where.categoryId = parseInt(categoryId);
     if (active !== null) where.active = active === "true";
 
-    const products = await prisma.product.findMany({
-      where,
-      include: {
-        category: true,
-        prices: { include: { priceList: true } },
-        stock: true,
-      },
-      orderBy: { name: "asc" },
-    });
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: {
+          category: true,
+          prices: { include: { priceList: true } },
+          stock: true,
+        },
+        orderBy: { name: "asc" },
+        skip: pageSize ? (page - 1) * pageSize : undefined,
+        take: pageSize || undefined,
+      }),
+      prisma.product.count({ where }),
+    ]);
 
-    return NextResponse.json(products);
+    return NextResponse.json({ products, total, page, pageSize });
   } catch (error) {
     console.error("Get products error:", error);
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchProducts }, { status: 500 });
   }
 }
 
@@ -51,7 +67,7 @@ export async function POST(request: NextRequest) {
     const { barcode, name, categoryId, cost, active } = body;
 
     if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameRequired }, { status: 400 });
     }
 
     const product = await prisma.product.create({
@@ -71,9 +87,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "A product with that barcode already exists" }, { status: 409 });
+      return NextResponse.json({ error: t.api.barcodeExists }, { status: 409 });
     }
     console.error("Create product error:", error);
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateProduct }, { status: 500 });
   }
 }

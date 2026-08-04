@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET() {
   const denied = await requirePolicy(POLICY.rolesView);
@@ -22,7 +25,7 @@ export async function GET() {
     return NextResponse.json(roles);
   } catch (error) {
     console.error("Get roles error:", error);
-    return NextResponse.json({ error: "Failed to fetch roles" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchRoles }, { status: 500 });
   }
 }
 
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
     const { name, description, policies } = await request.json();
 
     if (!name || !name.trim()) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameRequired }, { status: 400 });
     }
 
     const role = await prisma.$transaction(async (tx) => {
@@ -59,9 +62,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(role, { status: 201 });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "A role with that name already exists" }, { status: 409 });
+      return NextResponse.json({ error: t.api.roleExists }, { status: 409 });
     }
     console.error("Create role error:", error);
-    return NextResponse.json({ error: "Failed to create role" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateRole }, { status: 500 });
   }
 }

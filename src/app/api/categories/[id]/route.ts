@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePolicy(POLICY.categoriesView);
@@ -14,13 +17,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     });
 
     if (!category || category.deletedAt) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.categoryNotFound }, { status: 404 });
     }
 
     return NextResponse.json(category);
   } catch (error) {
     console.error("Get category error:", error);
-    return NextResponse.json({ error: "Failed to fetch category" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchCategory }, { status: 500 });
   }
 }
 
@@ -34,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { name } = body;
 
     if (!name || !name.trim()) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameRequired }, { status: 400 });
     }
 
     const category = await prisma.category.update({
@@ -45,13 +48,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(category);
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "A category with that name already exists" }, { status: 409 });
+      return NextResponse.json({ error: t.api.categoryExists }, { status: 409 });
     }
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2025") {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.categoryNotFound }, { status: 404 });
     }
     console.error("Update category error:", error);
-    return NextResponse.json({ error: "Failed to update category" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedUpdateCategory }, { status: 500 });
   }
 }
 
@@ -75,9 +78,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2025") {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.categoryNotFound }, { status: 404 });
     }
     console.error("Delete category error:", error);
-    return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedDeleteCategory }, { status: 500 });
   }
 }

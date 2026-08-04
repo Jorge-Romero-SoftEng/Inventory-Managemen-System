@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
 import bcrypt from "bcryptjs";
+
+const t = getTranslations();
 
 export async function GET() {
   const denied = await requirePolicy(POLICY.usersView);
@@ -24,7 +27,7 @@ export async function GET() {
     return NextResponse.json(users);
   } catch (error) {
     console.error("Get users error:", error);
-    return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchUsers }, { status: 500 });
   }
 }
 
@@ -36,15 +39,15 @@ export async function POST(request: NextRequest) {
     const { name, email, password, roleId, active } = await request.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json({ error: "Name, email and password are required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.nameEmailPasswordRequired }, { status: 400 });
     }
     if (!roleId) {
-      return NextResponse.json({ error: "Role is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.roleRequired }, { status: 400 });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      return NextResponse.json({ error: t.api.emailRegistered }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -70,9 +73,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      return NextResponse.json({ error: t.api.emailRegistered }, { status: 409 });
     }
     console.error("Create user error:", error);
-    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreateUser }, { status: 500 });
   }
 }

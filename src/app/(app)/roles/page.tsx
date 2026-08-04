@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +35,7 @@ interface RoleDetail extends RoleRow {
 
 export default function RolesPage() {
   const t = useTranslations();
-  const me = useMe();
+  const { me } = useMe();
   const canManage = me?.policies.includes("roles.manage") ?? false;
   const lang = getLocale();
 
@@ -129,11 +128,9 @@ export default function RolesPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.roles.title}</h1>
             {canManage && (
@@ -163,7 +160,7 @@ export default function RolesPage() {
                     <TableHead>{t.roles.description}</TableHead>
                     <TableHead className="text-right">{t.roles.policies}</TableHead>
                     <TableHead className="text-right">{t.roles.users}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {canManage && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -186,13 +183,13 @@ export default function RolesPage() {
                           <Badge variant="secondary">{r._count.rolePolicies}</Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs">{r._count.users}</TableCell>
+                        {canManage && (
                         <TableCell>
                           <div className="flex gap-1">
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              disabled={!canManage}
                               onClick={() => openEdit(r)}
                               aria-label={`Edit ${r.name}`}
                             >
@@ -202,7 +199,7 @@ export default function RolesPage() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-red-400"
-                              disabled={!canManage || r.isSystem}
+                              disabled={r.isSystem}
                               onClick={() => handleDelete(r.id)}
                               aria-label={`Delete ${r.name}`}
                             >
@@ -210,6 +207,7 @@ export default function RolesPage() {
                             </Button>
                           </div>
                         </TableCell>
+                        )}
                       </TableRow>
                     ))}
                 </TableBody>
@@ -217,7 +215,6 @@ export default function RolesPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-lg">
@@ -271,6 +268,6 @@ export default function RolesPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

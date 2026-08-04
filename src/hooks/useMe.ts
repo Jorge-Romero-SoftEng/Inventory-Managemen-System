@@ -14,21 +14,28 @@ export interface Me {
 
 export function useMe() {
   const [me, setMe] = useState<Me | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((data: Me | null) => {
-        if (!cancelled) setMe(data);
+        if (!cancelled) {
+          setMe(data);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        if (!cancelled) setMe(null);
+        if (!cancelled) {
+          setMe(null);
+          setLoading(false);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  return me;
+  return { me, loading };
 }

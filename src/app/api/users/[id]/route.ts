@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
 import bcrypt from "bcryptjs";
+
+const t = getTranslations();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requirePolicy(POLICY.usersView);
@@ -24,12 +27,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       },
     });
     if (!user || user.deletedAt) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.userNotFound }, { status: 404 });
     }
     return NextResponse.json(user);
   } catch (error) {
     console.error("Get user error:", error);
-    return NextResponse.json({ error: "Failed to fetch user" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchUser }, { status: 500 });
   }
 }
 
@@ -65,13 +68,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(user);
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2002") {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      return NextResponse.json({ error: t.api.emailRegistered }, { status: 409 });
     }
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2025") {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.userNotFound }, { status: 404 });
     }
     console.error("Update user error:", error);
-    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedUpdateUser }, { status: 500 });
   }
 }
 
@@ -82,14 +85,14 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: t.api.unauthorized }, { status: 401 });
     }
 
     const { id } = await params;
     const userId = parseInt(id);
 
     if (userId === session.userId) {
-      return NextResponse.json({ error: "You cannot delete your own account" }, { status: 400 });
+      return NextResponse.json({ error: t.api.cannotDeleteOwnAccount }, { status: 400 });
     }
 
     await prisma.user.update({
@@ -99,9 +102,9 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof Error && "code" in error && (error as { code?: string }).code === "P2025") {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: t.api.userNotFound }, { status: 404 });
     }
     console.error("Delete user error:", error);
-    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedDeleteUser }, { status: 500 });
   }
 }

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ saleId: string }> }) {
   const denied = await requirePolicy(POLICY.salesView);
@@ -15,6 +18,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json(payments);
   } catch (error) {
     console.error("Get payments error:", error);
-    return NextResponse.json({ error: "Failed to fetch payments" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchPayments }, { status: 500 });
   }
 }

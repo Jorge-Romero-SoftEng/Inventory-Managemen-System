@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET() {
   const denied = await requirePolicy(POLICY.reportsView);
@@ -23,6 +26,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Balances report error:", error);
-    return NextResponse.json({ error: "Failed to generate report" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedGenerateReport }, { status: 500 });
   }
 }

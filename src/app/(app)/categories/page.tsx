@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useTranslations } from "@/i18n";
+import { useMe } from "@/hooks/useMe";
 import type { Category } from "@/types";
 
 interface CategoryWithCount extends Category {
@@ -18,6 +18,10 @@ interface CategoryWithCount extends Category {
 
 export default function CategoriesPage() {
   const t = useTranslations();
+  const { me } = useMe();
+  const canCreate = me?.policies.includes("categories.create") ?? false;
+  const canUpdate = me?.policies.includes("categories.update") ?? false;
+  const canDelete = me?.policies.includes("categories.delete") ?? false;
   const [categories, setCategories] = useState<CategoryWithCount[]>([]);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -68,17 +72,17 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar />
-        <div className="flex-1 overflow-auto p-4">
+    <>
+      <TopBar />
+      <div className="flex-1 overflow-auto p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{t.categories.title}</h1>
-            <Button onClick={openNew} aria-label={t.categories.newCategory}>
-              <Plus className="h-4 w-4 mr-1" />
-              {t.categories.newCategory}
-            </Button>
+            {canCreate && (
+              <Button onClick={openNew} aria-label={t.categories.newCategory}>
+                <Plus className="h-4 w-4 mr-1" />
+                {t.categories.newCategory}
+              </Button>
+            )}
           </div>
 
           <div className="relative mb-4">
@@ -98,7 +102,7 @@ export default function CategoriesPage() {
                   <TableRow>
                     <TableHead>{t.common.name}</TableHead>
                     <TableHead className="text-right">{t.categories.products}</TableHead>
-                    <TableHead className="w-20"></TableHead>
+                    {(canUpdate || canDelete) && <TableHead className="w-20"></TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -107,14 +111,20 @@ export default function CategoriesPage() {
                       <TableCell className="font-medium">{c.name}</TableCell>
                       <TableCell className="text-right font-mono text-xs">{c._count?.products ?? 0}</TableCell>
                       <TableCell>
+                        {(canUpdate || canDelete) && (
                         <div className="flex gap-1">
+                          {canUpdate && (
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)} aria-label={`Edit ${c.name}`}>
                             <Pencil className="h-3 w-3" />
                           </Button>
+                          )}
+                          {canDelete && (
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400" onClick={() => handleDelete(c.id)} aria-label={`Delete ${c.name}`}>
                             <Trash2 className="h-3 w-3" />
                           </Button>
+                          )}
                         </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -123,7 +133,6 @@ export default function CategoriesPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-md">
@@ -142,6 +151,6 @@ export default function CategoriesPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

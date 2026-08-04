@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET(request: NextRequest) {
   const denied = await requirePolicy(POLICY.priceListsView);
@@ -32,7 +35,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(mapped);
   } catch (error) {
     console.error("Get price lists error:", error);
-    return NextResponse.json({ error: "Failed to fetch price lists" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchPriceLists }, { status: 500 });
   }
 }
 
@@ -43,12 +46,12 @@ export async function POST(request: NextRequest) {
   try {
     const { nameEs, nameEn } = await request.json();
     if (!nameEs || !nameEn) {
-      return NextResponse.json({ error: "nameEs and nameEn are required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.priceListNameRequired }, { status: 400 });
     }
     const priceList = await prisma.priceList.create({ data: { nameEs, nameEn } });
     return NextResponse.json(priceList, { status: 201 });
   } catch (error) {
     console.error("Create price list error:", error);
-    return NextResponse.json({ error: "Failed to create price list" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedCreatePriceList }, { status: 500 });
   }
 }

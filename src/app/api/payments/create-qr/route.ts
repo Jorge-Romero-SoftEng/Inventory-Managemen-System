@@ -3,12 +3,15 @@ import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { requirePolicy, POLICY } from "@/lib/policies";
 import { getMercadoPagoOrder } from "@/lib/mercadopago";
+import { getTranslations } from "@/i18n/translations";
 import { randomUUID } from "crypto";
 import {
   calculateSubtotal,
   calculateDiscountTotal,
   calculateTotal,
 } from "@/lib/pricing";
+
+const t = getTranslations();
 
 export async function POST(request: NextRequest) {
   const denied = await requirePolicy(POLICY.salesCreate);
@@ -17,14 +20,14 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: t.api.unauthorized }, { status: 401 });
     }
 
     const body = await request.json();
     const { customerId, items, discount, tax } = body;
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.atLeastOneItem }, { status: 400 });
     }
 
     const subtotal = calculateSubtotal(
@@ -158,7 +161,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Create QR order error:", error);
     return NextResponse.json(
-      { error: "Failed to create QR order" },
+      { error: t.api.failedCreateQROrder },
       { status: 500 }
     );
   }

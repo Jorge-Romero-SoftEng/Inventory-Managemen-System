@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function GET() {
   const denied = await requirePolicy(POLICY.stockView);
@@ -15,6 +18,6 @@ export async function GET() {
     return NextResponse.json(stock);
   } catch (error) {
     console.error("Get stock error:", error);
-    return NextResponse.json({ error: "Failed to fetch stock" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedFetchStock }, { status: 500 });
   }
 }

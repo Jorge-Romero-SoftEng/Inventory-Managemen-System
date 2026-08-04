@@ -11,7 +11,13 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Public env vars are inlined into client bundles at build time
+ARG NEXT_PUBLIC_APP_NAME
+ENV NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
+ARG NEXT_PUBLIC_LOCALE
+ENV NEXT_PUBLIC_LOCALE=${NEXT_PUBLIC_LOCALE}
 # Builds the standalone bundle inside .next/standalone
+RUN npm run prebuild
 RUN npm run build
 
 # --- Stage 2.5: Dedicated Migrator ---

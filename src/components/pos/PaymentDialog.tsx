@@ -52,9 +52,6 @@ export function PaymentDialog({
 
   const paymentMethods = [
     { id: "cash", label: t.payment.cash, color: "bg-green-600 hover:bg-green-500" },
-    { id: "transfer", label: t.payment.transfer, color: "bg-blue-600 hover:bg-blue-500" },
-    { id: "qr", label: t.payment.qrCode, color: "bg-teal-600 hover:bg-teal-500" },
-    { id: "credit", label: t.payment.creditAccount, color: "bg-orange-600 hover:bg-orange-500" },
   ];
 
   const resetQr = useCallback(() => {
@@ -325,7 +322,7 @@ export function PaymentDialog({
             )}
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)} aria-label={t.common.cancel}>
+              <Button variant="outline" className="flex-1 h-12" onClick={() => onOpenChange(false)} aria-label={t.common.cancel}>
                 {t.common.cancel}
               </Button>
               <Button className="flex-1 h-12 text-base font-bold" onClick={handlePay} disabled={!canPay} aria-label={method === "qr" ? t.payment.generateQR : t.payment.confirmPayment}>

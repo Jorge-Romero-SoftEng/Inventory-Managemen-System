@@ -41,6 +41,10 @@ services:
       context: .
       target: runner
     image: ${APP_IMAGE_NAME}-security:${APP_IMAGE_TAG}
+    args:
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Wholesale POS}
+      NEXT_PUBLIC_LOCALE: ${NEXT_PUBLIC_LOCALE:-es}
+    image: ${APP_IMAGE_NAME}:${APP_IMAGE_TAG}
     pull_policy: never
     container_name: PentestingPOS-app-security
     restart: unless-stopped
@@ -48,6 +52,7 @@ services:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:${DB_PORT}/${DB_NAME}?schema=public
       JWT_SECRET: ${JWT_SECRET}
       NEXT_PUBLIC_LOCALE: ${NEXT_PUBLIC_LOCALE}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Wholesale POS}
     depends_on:
       migration:
         condition: service_completed_successfully

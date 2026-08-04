@@ -1,6 +1,5 @@
 "use client";
 
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ProductSearch } from "@/components/pos/ProductSearch";
@@ -190,11 +189,9 @@ export default function POSPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
+    <>
+      <TopBar saleNumber={nextInvoice} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <TopBar saleNumber={nextInvoice} />
-        <div className="flex flex-col flex-1 overflow-hidden">
           <ProductSearch ref={searchRef} onSelectProduct={addToCart} priceListId={selectedPriceList} />
           <div className="flex-1 overflow-auto p-2">
             <SaleGrid
@@ -220,7 +217,6 @@ export default function POSPage() {
             onClear={clearCart}
           />
         </div>
-      </div>
       <PaymentDialog
         open={showPayment}
         onOpenChange={setShowPayment}
@@ -229,6 +225,6 @@ export default function POSPage() {
         onGenerateQR={handleGenerateQR}
         customer={selectedCustomer}
       />
-    </div>
+    </>
   );
 }

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requirePolicy, POLICY } from "@/lib/policies";
+import { getTranslations } from "@/i18n/translations";
+
+const t = getTranslations();
 
 export async function POST(request: NextRequest) {
   const denied = await requirePolicy(POLICY.stockAdjust);
@@ -10,7 +13,7 @@ export async function POST(request: NextRequest) {
     const { productId, quantity, movementType, referenceType, referenceId } = await request.json();
 
     if (!productId || !quantity || !movementType) {
-      return NextResponse.json({ error: "ProductId, quantity, and movementType are required" }, { status: 400 });
+      return NextResponse.json({ error: t.api.stockMoveRequired }, { status: 400 });
     }
 
     const qty = parseFloat(quantity);
@@ -28,6 +31,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error("Stock move error:", error);
-    return NextResponse.json({ error: "Failed to record stock movement" }, { status: 500 });
+    return NextResponse.json({ error: t.api.failedRecordMovement }, { status: 500 });
   }
 }
