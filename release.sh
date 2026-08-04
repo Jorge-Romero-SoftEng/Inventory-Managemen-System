@@ -16,7 +16,7 @@ echo "Building pruning..."
 docker builder prune --all
 
 echo "System pruning..."
-docker system prune --all --volumes
+#docker system prune --all --volumes
 
 echo "Building images..."
 docker build -t $APP_IMAGE .
