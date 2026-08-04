@@ -40,11 +40,10 @@ services:
     build:
       context: .
       target: runner
+      args:
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Wholesale POS}
+        NEXT_PUBLIC_LOCALE: ${NEXT_PUBLIC_LOCALE:-es}
     image: ${APP_IMAGE_NAME}-security:${APP_IMAGE_TAG}
-    args:
-      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Wholesale POS}
-      NEXT_PUBLIC_LOCALE: ${NEXT_PUBLIC_LOCALE:-es}
-    image: ${APP_IMAGE_NAME}:${APP_IMAGE_TAG}
     pull_policy: never
     container_name: PentestingPOS-app-security
     restart: unless-stopped
@@ -71,6 +70,10 @@ services:
     container_name: PentestingPOS-zap
     #tty: true                  
     #stdin_open: true
+
+    mem_limit: 6g
+    environment:
+      - ZAP_JAVA_OPTIONS=-Xmx3g
 
     depends_on:
       app:

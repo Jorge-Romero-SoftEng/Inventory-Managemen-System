@@ -1,11 +1,5 @@
 env:
   contexts:
-    # - name: POS
-    #   urls:
-    #     - http://app
-    #   includePaths:
-    #     - http://app.*
-
     - name: "Authenticated-App"
       urls:
         - "http://app"
@@ -28,61 +22,53 @@ env:
           pollUrl: "http://app/pos"
           pollFrequency: 60
           pollUnits: "requests"
-      sessionManagement:
-        method: "cookie"
       users:
         - name: "scan_admin"
           credentials:
             username: "admin@wholesale.com"
             password: "1234"
 
+# docker run --rm --network PentestingPOS-security-net curlimages/curl -i \
+#   -X POST http://app/api/auth/login \
+#   -H "content-type: application/json" \
+#   -d '{"email":"admin@wholesale.com","password":"1234"}'
+
 jobs:
-  - type: spider
-    parameters:
-      context: "Authenticated-App"
-      user: "scan_admin"
-      url: "http://app/pos"
-      maxDuration: 10
+  - type: replacer
+    parameters: {}
+    rules:
+      - description: "Inject JWT Bearer token"
+        url: "http://app.*"
+        matchType: "REQ_HEADER"
+        matchString: "Authorization"
+        replacementString: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWRtaW5Ad2hvbGVzYWxlLmNvbSIsIm5hbWUiOiJBZG1pbiIsInJvbGUiOiJBZG1pbiIsInJvbGVJZCI6MSwiaWF0IjoxNzg1ODI0MzQ1LCJleHAiOjE3ODU5MTA3NDV9.8vmE6X-RRNFB6iWK63abQVHYBgPrx8Ql8cDBOoX5oNU"
+        initiators: []
+
+  # - type: spider
+  #   parameters:
+  #     context: "Authenticated-App"
+  #     user: "scan_admin"
+  #     url: "http://app.*"
+  #     maxDuration: 5
 
   - type: spiderAjax
     parameters:
-      context: "Authenticated-App"
       user: "scan_admin"
-      url: "http://app/pos"
-      maxDuration: 10
-      browserId: "firefox-headless"
 
-  - type: passiveScan-wait
-    parameters:
-      maxDuration: 5
+  # - type: passiveScan-wait
+  #   parameters:
+  #     maxDuration: 5
 
-  - type: activeScan
-    parameters:
-      context: "Authenticated-App"
-      user: "scan_admin"
-      url: "http://app/pos"
+  # - type: activeScan
+  #   parameters:
+  #     context: "Authenticated-App"
+  #     user: "scan_admin"
+  #     policy: "Default Policy"
+  #     maxRuleDurationInMins: 2
+  #     maxScanDurationInMins: 5
 
   - type: report
     parameters:
       template: "modern"
       reportDir: "/zap/reports"
       reportFile: "zap-authenticated-report"
-  # # 2. Discover React routes
-  # - type: spiderAjax
-  #   parameters:
-  #     context: POS
-
-  # # 3. Passive security analysis
-  # - type: passiveScan-wait
-
-  # # 4. Active attack simulation
-  # - type: activeScan
-  #   parameters:
-  #     context: POS
-
-  # # 5. Generate reports
-  # - type: report
-  #   parameters:
-  #     template: traditional-html
-  #     reportDir: /zap/reports
-  #     reportFile: report.html
