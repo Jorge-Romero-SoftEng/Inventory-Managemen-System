@@ -322,7 +322,7 @@ export function PaymentDialog({
             )}
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)} aria-label={t.common.cancel}>
+              <Button variant="outline" className="flex-1 h-12" onClick={() => onOpenChange(false)} aria-label={t.common.cancel}>
                 {t.common.cancel}
               </Button>
               <Button className="flex-1 h-12 text-base font-bold" onClick={handlePay} disabled={!canPay} aria-label={method === "qr" ? t.payment.generateQR : t.payment.confirmPayment}>
