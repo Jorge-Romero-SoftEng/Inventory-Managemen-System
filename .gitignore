@@ -6,7 +6,7 @@ __pycache__
 
 # testing
 /coverage
-
+/storage
 # next.js
 /.next/
 /out/

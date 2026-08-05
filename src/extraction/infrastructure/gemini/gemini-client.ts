@@ -94,8 +94,8 @@ export class GeminiClient implements IAiExtractor {
                     properties: {
                       name: { type: "STRING" },
                       unit: { type: "STRING" },
-                      price: { type: ["NUMBER", "NULL"] },
-                      currency: { type: ["STRING", "NULL"] },
+                      price: { type: "NUMBER", nullable: true },
+                      currency: { type: "STRING", nullable: true },
                       availability: { type: "STRING" },
                     },
                     required: ["name", "unit", "price", "currency", "availability"],
