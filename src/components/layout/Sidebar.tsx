@@ -17,6 +17,8 @@ import {
   Tags,
   Shield,
   UserCog,
+  Truck,
+  FileUp,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -36,6 +38,8 @@ export function Sidebar() {
     { href: "/reports", label: t.nav.reports, icon: BarChart3, policy: "reports.view" },
     { href: "/users", label: t.nav.users, icon: UserCog, policy: "users.view" },
     { href: "/roles", label: t.nav.roles, icon: Shield, policy: "roles.view" },
+    { href: "/providers", label: t.nav.providers, icon: Truck, policy: "suppliers.view" },
+    { href: "/providers/extractions", label: t.nav.extractions, icon: FileUp, policy: "extractions.view" },
   ].filter((item) => gate(item.policy));
 
   return (

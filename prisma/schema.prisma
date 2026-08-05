@@ -218,3 +218,88 @@ model StockMovement {
 
   @@map("stock_movements")
 }
+
+model Supplier {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(255)
+  contact   String?   @db.VarChar(255)
+  phone     String?   @db.VarChar(50)
+  notes     String?   @db.Text
+  active    Boolean   @default(true)
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @map("updated_at")
+
+  products           SupplierProduct[]
+  priceLists         SupplierPriceList[]
+  extractedDocuments ExtractedDocument[]
+
+  @@map("suppliers")
+}
+
+model SupplierProduct {
+  id         Int      @id @default(autoincrement())
+  supplierId Int      @map("supplier_id")
+  name       String   @db.VarChar(255)
+  unit       String   @default("") @db.VarChar(50)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @map("updated_at")
+
+  supplier      Supplier                 @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  priceListItems SupplierPriceListItem[]
+
+  @@unique([supplierId, name])
+  @@map("supplier_products")
+}
+
+model SupplierPriceList {
+  id               Int       @id @default(autoincrement())
+  supplierId       Int       @map("supplier_id")
+  effectiveDate    DateTime  @map("effective_date")
+  currency         String?   @default("ARS") @db.VarChar(10)
+  sourceDocumentId Int?      @map("source_document_id")
+  status           String    @default("extracted") @db.VarChar(20)
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  supplier       Supplier                @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  sourceDocument ExtractedDocument?      @relation(fields: [sourceDocumentId], references: [id])
+  items          SupplierPriceListItem[]
+
+  @@map("supplier_price_lists")
+}
+
+model SupplierPriceListItem {
+  id           Int      @id @default(autoincrement())
+  priceListId  Int      @map("price_list_id")
+  productId    Int      @map("product_id")
+  price        Decimal  @default(0) @db.Decimal(12, 2)
+  currency     String?  @db.VarChar(10)
+  availability String   @default("unknown") @db.VarChar(20)
+
+  priceList SupplierPriceList   @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  product   SupplierProduct     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("supplier_price_list_items")
+}
+
+model ExtractedDocument {
+  id             Int       @id @default(autoincrement())
+  inputType      String    @map("input_type") @db.VarChar(50)
+  fileName       String?   @map("file_name") @db.VarChar(255)
+  mimeType       String?   @map("mime_type") @db.VarChar(150)
+  storagePath    String?   @map("storage_path") @db.Text
+  rawText        String    @map("raw_text") @db.Text
+  contentHash    String    @map("content_hash") @db.VarChar(64) @unique
+  status         String    @default("processed") @db.VarChar(20)
+  errorMessage   String?   @map("error_message") @db.Text
+  geminiResponse Json?     @map("gemini_response")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  supplierId Int? @map("supplier_id")
+
+  supplier   Supplier?            @relation(fields: [supplierId], references: [id])
+  priceLists SupplierPriceList[]
+
+  @@map("extracted_documents")
+}

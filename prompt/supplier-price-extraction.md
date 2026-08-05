@@ -1,0 +1,11 @@
+What was built
+- Prisma models (prisma/schema.prisma): Supplier, SupplierProduct, SupplierPriceList, SupplierPriceListItem, ExtractedDocument (snake_case, soft-delete + audit conventions). Schema validates.
+- Clean-architecture module (src/extraction/): domain/ (entities, typed errors), application/ (ports/contracts, ExtractionPipelineService, SupplierService, DI container), infrastructure/ (WhatsApp/PDF/Excel/Google Sheets extractors, Gemini 2.5 Flash REST client with structured JSON output, local storage, Prisma repositories). All dependencies are constructor-injected.
+- Pipeline (matches the spec): detect type → extract text → Gemini → Zod validate (with Argentine number coercion like "1.250,50" → 1250.5) → transactional persist (supplier upsert, product upsert, price list + items, document) → original archived for audit → errors logged as error documents with a retry path. Content-hash dedupe rejects repeats.
+- API routes: /api/suppliers CRUD, /api/suppliers/[id]/price-lists, /api/extractions (multipart ingest), /api/extractions/[id], /api/extractions/[id]/document, /api/extractions/[id]/retry — all gated by new RBAC policies (suppliers.*, extractions.*).
+- UI: /providers (supplier CRUD + price-list viewer) and /providers/extractions (list, new-extraction dialog for WhatsApp/PDF/Excel/Sheets, detail with items, download original, retry), sidebar entries, and es/en i18n.
+- Tests: 6 new test files — 179/179 tests pass; tsc --noEmit clean.
+- Env: added GEMINI_API_KEY, GOOGLE_SHEETS_API_KEY, STORAGE_DIR to .env.example and created .env.local (ignored by git).
+Two things need your action
+1. Database migration — Postgres isn't running locally, so prisma migrate dev failed with P1001. Start your DB and run npx prisma migrate dev --name add_supplier_price_extraction && npm run db:seed.
+2. Lint is broken at the repo level — pre-existing since commit 9955a60: the brace-expansion: 5.0.8 override in package.json breaks ESLint's minimatch@3.1.5 (TypeError: expand is not a function), so npm run lint crashes before linting anything. Want me to fix that override (e.g., also override minimatch to a version compatible with brace-expansion 5)?

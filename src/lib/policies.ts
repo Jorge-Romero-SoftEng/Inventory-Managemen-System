@@ -28,6 +28,11 @@ export const POLICY = {
   usersManage: "users.manage",
   rolesView: "roles.view",
   rolesManage: "roles.manage",
+  suppliersView: "suppliers.view",
+  suppliersManage: "suppliers.manage",
+  extractionsView: "extractions.view",
+  extractionsCreate: "extractions.create",
+  extractionsRetry: "extractions.retry",
 } as const;
 
 export interface PolicyCatalogEntry {
@@ -62,6 +67,11 @@ export const POLICY_CATALOG: PolicyCatalogEntry[] = [
   { key: POLICY.usersManage, nameEs: "Gestionar usuarios", nameEn: "Manage users", module: "users" },
   { key: POLICY.rolesView, nameEs: "Ver roles", nameEn: "View roles", module: "roles" },
   { key: POLICY.rolesManage, nameEs: "Gestionar roles", nameEn: "Manage roles", module: "roles" },
+  { key: POLICY.suppliersView, nameEs: "Ver proveedores", nameEn: "View suppliers", module: "suppliers" },
+  { key: POLICY.suppliersManage, nameEs: "Gestionar proveedores", nameEn: "Manage suppliers", module: "suppliers" },
+  { key: POLICY.extractionsView, nameEs: "Ver extracciones de precios", nameEn: "View price extractions", module: "extractions" },
+  { key: POLICY.extractionsCreate, nameEs: "Crear extracciones de precios", nameEn: "Create price extractions", module: "extractions" },
+  { key: POLICY.extractionsRetry, nameEs: "Reintentar extracciones", nameEn: "Retry price extractions", module: "extractions" },
 ];
 
 export interface SessionUser {

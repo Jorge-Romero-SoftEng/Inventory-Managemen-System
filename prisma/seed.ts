@@ -34,6 +34,11 @@ const POLICY_CATALOG = [
   { key: "users.manage", nameEs: "Gestionar usuarios", nameEn: "Manage users", module: "users" },
   { key: "roles.view", nameEs: "Ver roles", nameEn: "View roles", module: "roles" },
   { key: "roles.manage", nameEs: "Gestionar roles", nameEn: "Manage roles", module: "roles" },
+  { key: "suppliers.view", nameEs: "Ver proveedores", nameEn: "View suppliers", module: "suppliers" },
+  { key: "suppliers.manage", nameEs: "Gestionar proveedores", nameEn: "Manage suppliers", module: "suppliers" },
+  { key: "extractions.view", nameEs: "Ver extracciones de precios", nameEn: "View price extractions", module: "extractions" },
+  { key: "extractions.create", nameEs: "Crear extracciones de precios", nameEn: "Create price extractions", module: "extractions" },
+  { key: "extractions.retry", nameEs: "Reintentar extracciones", nameEn: "Retry price extractions", module: "extractions" },
 ];
 
 async function seedRolesAndPolicies() {
